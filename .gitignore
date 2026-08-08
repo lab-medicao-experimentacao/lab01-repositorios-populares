@@ -1,0 +1,18 @@
+# Credenciais locais
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editores e sistema operacional
+.idea/
+.vscode/
+.DS_Store
+
+# Dados gerados pela coleta e análise
+data/*
+!data/.gitkeep
+
