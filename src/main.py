@@ -9,7 +9,14 @@ from github_api import (
     get_github_token,
     load_query,
 )
-from metrics import extract_rq01_metrics, extract_rq02_metrics, extract_rq03_metrics, extract_rq04_metrics
+from metrics import (
+    extract_rq01_metrics,
+    extract_rq02_metrics,
+    extract_rq03_metrics,
+    extract_rq04_metrics,
+    extract_rq05_metrics,
+    extract_rq06_metrics,
+)
 
 
 QUERY_PATH = Path(__file__).resolve().parent.parent / "graphql" / "repositories.graphql"
@@ -32,6 +39,8 @@ def show_sample( # amostra
         print(f"Pull requests aceitas (RQ02): {repository['mergedPullRequests']}")
         print(f"Total de releases (RQ03): {repository['totalReleases']}")
         print(f"Tempo desde o último update (RQ04): {repository['timeSinceLastUpdate']} dias")
+        print(f"Linguagem primária (RQ05): {repository['primaryLanguage']}")
+        print(f"Issues fechadas/total (RQ06): {repository['closedIssues']}/{repository['totalIssues']} ({repository['closedIssuesRatio']})")
         print("\n")
 
 
@@ -54,7 +63,9 @@ def main() -> None:
                 **extract_rq01_metrics(repository, collected_at),
                 **extract_rq02_metrics(repository),
                 **extract_rq03_metrics(repository),
-                **extract_rq04_metrics(repository, collected_at)
+                **extract_rq04_metrics(repository, collected_at),
+                **extract_rq05_metrics(repository),
+                **extract_rq06_metrics(repository),
             }
         )
 
