@@ -17,5 +17,15 @@ Para a RQ05 ("sistemas populares são escritos nas linguagens mais populares?"),
 ├── data/       # arquivos gerados pela coleta e análise
 ├── doc/        # enunciado e documentação do trabalho
 ├── graphql/    # consultas GraphQL
-└── src/        # código-fonte Python
+├── src/        # código-fonte Python
+└── tests/      # testes automatizados (pytest)
+```
+
+## Testes
+
+Instale as dependências de desenvolvimento e rode a suíte:
+
+```bash
+pip install -r requirements-dev.txt
+pytest
 ```
