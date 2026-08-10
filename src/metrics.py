@@ -58,3 +58,26 @@ def extract_rq04_metrics(
             collected_at
         )
     }
+
+
+def extract_rq05_metrics(repository: dict[str, Any]) -> dict[str, Any]:
+    """
+    Collects the primary language of the repository.
+    """
+    language = repository["primaryLanguage"]
+    return {
+        "primaryLanguage": language["name"] if language else None,
+    }
+
+
+def extract_rq06_metrics(repository: dict[str, Any]) -> dict[str, Any]:
+    """
+    Collects the ratio of closed issues to total issues in the repository.
+    """
+    total_issues = repository["issues"]["totalCount"]
+    closed_issues = repository["closedIssues"]["totalCount"]
+    return {
+        "totalIssues": total_issues,
+        "closedIssues": closed_issues,
+        "closedIssuesRatio": closed_issues / total_issues if total_issues else None,
+    }
