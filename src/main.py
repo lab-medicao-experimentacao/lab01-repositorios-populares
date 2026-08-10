@@ -31,7 +31,8 @@ def show_sample( # amostra
         print(f"Idade em dias (RQ01): {repository['ageInDays']}")
         print(f"Pull requests aceitas (RQ02): {repository['mergedPullRequests']}")
         print(f"Total de releases (RQ03): {repository['totalReleases']}")
-        print(f"Tempo desde o último update (RQ04): {repository['timeSinceLastUpdate']}s")
+        print(f"Tempo desde o último update (RQ04): {repository['timeSinceLastUpdate']} dias")
+        print("\n")
 
 
 def main() -> None:
@@ -39,7 +40,7 @@ def main() -> None:
         token = get_github_token()
         url = get_github_graphql_url()
         query = load_query(QUERY_PATH)
-        data = execute_query(query, {"first": 100}, token, url)
+        data = execute_query(query, {"first": 5}, token, url)
     except GitHubAPIError as error:
         raise SystemExit(f"Erro: {error}") from error
 
