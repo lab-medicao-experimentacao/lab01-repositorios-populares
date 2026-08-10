@@ -9,7 +9,7 @@ from github_api import (
     get_github_token,
     load_query,
 )
-from metrics import extract_rq01_metrics, extract_rq02_metrics
+from metrics import extract_rq01_metrics, extract_rq02_metrics, extract_rq03_metrics, extract_rq04_metrics
 
 
 QUERY_PATH = Path(__file__).resolve().parent.parent / "graphql" / "repositories.graphql"
@@ -30,7 +30,8 @@ def show_sample( # amostra
         print(f"Criado em: {repository['createdAt']}")
         print(f"Idade em dias (RQ01): {repository['ageInDays']}")
         print(f"Pull requests aceitas (RQ02): {repository['mergedPullRequests']}")
-        print()
+        print(f"Total de releases (RQ03): {repository['totalReleases']}")
+        print(f"Tempo desde o último update (RQ04): {repository['timeSinceLastUpdate']}s")
 
 
 def main() -> None:
@@ -51,6 +52,8 @@ def main() -> None:
                 "stargazerCount": repository["stargazerCount"],
                 **extract_rq01_metrics(repository, collected_at),
                 **extract_rq02_metrics(repository),
+                **extract_rq03_metrics(repository),
+                **extract_rq04_metrics(repository, collected_at)
             }
         )
 
