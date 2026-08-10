@@ -13,7 +13,7 @@ from metrics import extract_rq01_metrics, extract_rq02_metrics, extract_rq03_met
 
 
 QUERY_PATH = Path(__file__).resolve().parent.parent / "graphql" / "repositories.graphql"
-SAMPLE_SIZE = 10 # numero de repo na amostra
+SAMPLE_SIZE = 100# numero de repo na amostra
 
 
 def show_sample( # amostra
