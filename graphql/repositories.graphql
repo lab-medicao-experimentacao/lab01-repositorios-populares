@@ -17,6 +17,15 @@ query TopRepositories($first: Int!) { # quantidade de repositorios passado por p
           totalCount
         }
         updatedAt # RQ04
+        primaryLanguage { # RQ05
+          name
+        }
+        issues { # RQ06 (total)
+          totalCount
+        }
+        closedIssues: issues(states: CLOSED) { # RQ06 (fechadas)
+          totalCount
+        }
       }
     }
   }
