@@ -11,10 +11,10 @@ def _calculate_time_since_update(
     collected_at: datetime,
 ) -> int:
     """
-    Calculates the time in seconds since the last update in the repository.
+    Calculates the time in days since the last update in the repository.
     """
     updated_date = datetime.fromisoformat(last_updated.replace("Z", "+00:00"))
-    return int((collected_at - updated_date).total_seconds())
+    return (collected_at - updated_date).days
 
 
 def extract_rq01_metrics(
