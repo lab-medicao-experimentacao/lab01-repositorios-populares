@@ -16,6 +16,7 @@ from metrics import (
     extract_rq04_metrics,
     extract_rq05_metrics,
     extract_rq06_metrics,
+    group_metrics_by_language,
 )
 
 
@@ -44,6 +45,20 @@ def show_sample( # amostra
         print("\n")
 
 
+def show_language_summary(grouped: dict[str, dict[str, Any]]) -> None:
+    print("Métricas por linguagem (RQ07)\n")
+
+    for language, metrics in grouped.items():
+        print(f"Linguagem: {language} ({metrics['repositoryCount']} repositórios)")
+        print(f"  Média de PRs aceitas: {metrics['avgMergedPullRequests']}")
+        print(f"  Média de releases: {metrics['avgTotalReleases']}")
+        print(
+            "  Média de dias desde a última atualização: "
+            f"{metrics['avgTimeSinceLastUpdate']}"
+        )
+        print()
+
+
 def main() -> None:
     try:
         token = get_github_token()
@@ -70,6 +85,7 @@ def main() -> None:
         )
 
     show_sample(repositories, collected_at)
+    show_language_summary(group_metrics_by_language(repositories))
 
 
 if __name__ == "__main__":
