@@ -21,13 +21,14 @@ from metrics import (
 
 
 QUERY_PATH = Path(__file__).resolve().parent.parent / "graphql" / "repositories.graphql"
-SAMPLE_SIZE = 100# numero de repo na amostra
+SAMPLE_SIZE = 100  # numero de repositorios consultados na API
+VALIDATION_SAMPLE_SIZE = 10  # numero de repositorios exibidos para validação manual
 
 
 def show_sample( # amostra
     repositories: list[dict[str, Any]],
     collected_at: datetime,
-    sample_size: int = SAMPLE_SIZE, 
+    sample_size: int = VALIDATION_SAMPLE_SIZE,
 ) -> None:
     print(f"Data da coleta (UTC): {collected_at.isoformat()}")
     print(f"Amostra para validação: {min(sample_size, len(repositories))} repositórios\n")
@@ -50,11 +51,11 @@ def show_language_summary(grouped: dict[str, dict[str, Any]]) -> None:
 
     for language, metrics in grouped.items():
         print(f"Linguagem: {language} ({metrics['repositoryCount']} repositórios)")
-        print(f"  Média de PRs aceitas: {metrics['avgMergedPullRequests']}")
-        print(f"  Média de releases: {metrics['avgTotalReleases']}")
+        print(f"  Média de PRs aceitas: {metrics['avgMergedPullRequests']:.2f}")
+        print(f"  Média de releases: {metrics['avgTotalReleases']:.2f}")
         print(
             "  Média de dias desde a última atualização: "
-            f"{metrics['avgTimeSinceLastUpdate']}"
+            f"{metrics['avgTimeSinceLastUpdate']:.2f}"
         )
         print()
 
@@ -84,7 +85,7 @@ def main() -> None:
             }
         )
 
-    show_sample(repositories, collected_at)
+    show_sample(repositories, collected_at, VALIDATION_SAMPLE_SIZE)
     show_language_summary(group_metrics_by_language(repositories))
 
 
