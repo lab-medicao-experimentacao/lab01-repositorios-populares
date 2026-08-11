@@ -81,3 +81,28 @@ def extract_rq06_metrics(repository: dict[str, Any]) -> dict[str, Any]:
         "closedIssues": closed_issues,
         "closedIssuesRatio": closed_issues / total_issues if total_issues else None,
     }
+
+
+def group_metrics_by_language(
+    repositories: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """
+    Agrupa PRs aceitas (RQ02), releases (RQ03) e tempo desde a última
+    atualização (RQ04) por linguagem primária (RQ05), calculando a média
+    de cada métrica por linguagem.
+    """
+    languages: dict[str, list[dict[str, Any]]] = {}
+    for repository in repositories:
+        language = repository["primaryLanguage"] or "Sem linguagem"
+        languages.setdefault(language, []).append(repository)
+
+    result: dict[str, dict[str, Any]] = {}
+    for language, repos in languages.items():
+        count = len(repos)
+        result[language] = {
+            "repositoryCount": count,
+            "avgMergedPullRequests": sum(r["mergedPullRequests"] for r in repos) / count,
+            "avgTotalReleases": sum(r["totalReleases"] for r in repos) / count,
+            "avgTimeSinceLastUpdate": sum(r["timeSinceLastUpdate"] for r in repos) / count,
+        }
+    return result
