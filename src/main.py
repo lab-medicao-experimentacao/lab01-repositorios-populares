@@ -49,7 +49,7 @@ def main() -> None:
         token = get_github_token()
         url = get_github_graphql_url()
         query = load_query(QUERY_PATH)
-        data = execute_query(query, {"first": 5}, token, url)
+        data = execute_query(query, {"first": SAMPLE_SIZE}, token, url)
     except GitHubAPIError as error:
         raise SystemExit(f"Erro: {error}") from error
 
