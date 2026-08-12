@@ -1,7 +1,7 @@
 from metrics import (
     extract_rq05_metrics,
     extract_rq06_metrics,
-    group_metrics_by_language,
+    extract_rq07_metrics,
 )
 
 
@@ -51,7 +51,7 @@ def test_extract_rq06_metrics_handles_zero_issues():
     }
 
 
-def test_group_metrics_by_language_groups_multiple_languages():
+def test_extract_rq07_metrics_groups_multiple_languages():
     repositories = [
         {
             "primaryLanguage": "Python",
@@ -67,7 +67,7 @@ def test_group_metrics_by_language_groups_multiple_languages():
         },
     ]
 
-    result = group_metrics_by_language(repositories)
+    result = extract_rq07_metrics(repositories)
 
     assert result == {
         "Python": {
@@ -85,7 +85,7 @@ def test_group_metrics_by_language_groups_multiple_languages():
     }
 
 
-def test_group_metrics_by_language_averages_same_language():
+def test_extract_rq07_metrics_averages_same_language():
     repositories = [
         {
             "primaryLanguage": "Python",
@@ -101,7 +101,7 @@ def test_group_metrics_by_language_averages_same_language():
         },
     ]
 
-    result = group_metrics_by_language(repositories)
+    result = extract_rq07_metrics(repositories)
 
     assert result == {
         "Python": {
@@ -113,7 +113,7 @@ def test_group_metrics_by_language_averages_same_language():
     }
 
 
-def test_group_metrics_by_language_handles_missing_language():
+def test_extract_rq07_metrics_handles_missing_language():
     repositories = [
         {
             "primaryLanguage": None,
@@ -123,7 +123,7 @@ def test_group_metrics_by_language_handles_missing_language():
         },
     ]
 
-    result = group_metrics_by_language(repositories)
+    result = extract_rq07_metrics(repositories)
 
     assert result == {
         "Sem linguagem": {
@@ -135,7 +135,7 @@ def test_group_metrics_by_language_handles_missing_language():
     }
 
 
-def test_group_metrics_by_language_handles_empty_list():
-    result = group_metrics_by_language([])
+def test_extract_rq07_metrics_handles_empty_list():
+    result = extract_rq07_metrics([])
 
     assert result == {}
