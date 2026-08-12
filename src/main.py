@@ -16,19 +16,18 @@ from metrics import (
     extract_rq04_metrics,
     extract_rq05_metrics,
     extract_rq06_metrics,
-    group_metrics_by_language,
+    extract_rq07_metrics,
 )
 
 
 QUERY_PATH = Path(__file__).resolve().parent.parent / "graphql" / "repositories.graphql"
-SAMPLE_SIZE = 100  # numero de repositorios consultados na API
-VALIDATION_SAMPLE_SIZE = 10  # numero de repositorios exibidos para validação manual
+SAMPLE_SIZE = 100  # numero de repositorios consultados na API e exibidos na amostra
 
 
 def show_sample( # amostra
     repositories: list[dict[str, Any]],
     collected_at: datetime,
-    sample_size: int = VALIDATION_SAMPLE_SIZE,
+    sample_size: int = SAMPLE_SIZE,
 ) -> None:
     print(f"Data da coleta (UTC): {collected_at.isoformat()}")
     print(f"Amostra para validação: {min(sample_size, len(repositories))} repositórios\n")
@@ -45,11 +44,8 @@ def show_sample( # amostra
         print(f"Issues fechadas/total (RQ06): {repository['closedIssues']}/{repository['totalIssues']} ({repository['closedIssuesRatio']})")
         print("\n")
 
-
-def show_language_summary(grouped: dict[str, dict[str, Any]]) -> None:
     print("Métricas por linguagem (RQ07)\n")
-
-    for language, metrics in grouped.items():
+    for language, metrics in extract_rq07_metrics(repositories).items():
         print(f"Linguagem: {language} ({metrics['repositoryCount']} repositórios)")
         print(f"  Média de PRs aceitas: {metrics['avgMergedPullRequests']:.2f}")
         print(f"  Média de releases: {metrics['avgTotalReleases']:.2f}")
@@ -85,8 +81,7 @@ def main() -> None:
             }
         )
 
-    show_sample(repositories, collected_at, VALIDATION_SAMPLE_SIZE)
-    show_language_summary(group_metrics_by_language(repositories))
+    show_sample(repositories, collected_at, SAMPLE_SIZE)
 
 
 if __name__ == "__main__":

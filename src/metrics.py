@@ -83,7 +83,7 @@ def extract_rq06_metrics(repository: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def group_metrics_by_language(
+def extract_rq07_metrics(
     repositories: list[dict[str, Any]],
 ) -> dict[str, dict[str, Any]]:
     """
