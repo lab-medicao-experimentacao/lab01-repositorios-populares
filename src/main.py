@@ -4,7 +4,7 @@ from typing import Any
 
 from github_api import (
     GitHubAPIError,
-    execute_query,
+    fetch_repositories,
     get_github_graphql_url,
     get_github_token,
     load_query,
@@ -22,6 +22,7 @@ from metrics import (
 
 QUERY_PATH = Path(__file__).resolve().parent.parent / "graphql" / "repositories.graphql"
 SAMPLE_SIZE = 100  # numero de repositorios consultados na API e exibidos na amostra
+BATCH_SIZE = 10  # tamanho de cada lote da consulta, evita 502/504 do GitHub (ver Issue #13)
 
 
 def show_sample( # amostra
@@ -61,13 +62,13 @@ def main() -> None:
         token = get_github_token()
         url = get_github_graphql_url()
         query = load_query(QUERY_PATH)
-        data = execute_query(query, {"first": SAMPLE_SIZE}, token, url)
+        repositories_data = fetch_repositories(query, SAMPLE_SIZE, BATCH_SIZE, token, url)
     except GitHubAPIError as error:
         raise SystemExit(f"Erro: {error}") from error
 
     collected_at = datetime.now(UTC)
     repositories = []
-    for repository in data["search"]["nodes"]:
+    for repository in repositories_data:
         repositories.append(
             {
                 "nameWithOwner": repository["nameWithOwner"],

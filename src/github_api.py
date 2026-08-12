@@ -84,3 +84,38 @@ def execute_query(query: str, variables: dict[str, Any], token: str, url: str) -
         raise GitHubAPIError("A resposta do GitHub não contém dados válidos.")
 
     return data
+
+
+def fetch_repositories(
+    query: str,
+    total: int,
+    batch_size: int,
+    token: str,
+    url: str,
+) -> list[dict[str, Any]]:
+    """
+    Busca repositorios em lotes de ate batch_size, em vez de uma unica
+    chamada com first=total, para evitar erros 502/504 do GitHub ao
+    agregar contagens (PRs, releases, issues) para muitos repositorios
+    numa unica consulta (ver Issue #13).
+    """
+    repositories: list[dict[str, Any]] = []
+    cursor: str | None = None
+
+    while len(repositories) < total:
+        remaining = total - len(repositories)
+        data = execute_query(
+            query,
+            {"first": min(batch_size, remaining), "after": cursor},
+            token,
+            url,
+        )
+        search = data["search"]
+        repositories.extend(search["nodes"])
+
+        page_info = search["pageInfo"]
+        if not page_info["hasNextPage"]:
+            break
+        cursor = page_info["endCursor"]
+
+    return repositories
