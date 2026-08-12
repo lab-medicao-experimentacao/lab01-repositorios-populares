@@ -16,17 +16,18 @@ from metrics import (
     extract_rq04_metrics,
     extract_rq05_metrics,
     extract_rq06_metrics,
+    extract_rq07_metrics,
 )
 
 
 QUERY_PATH = Path(__file__).resolve().parent.parent / "graphql" / "repositories.graphql"
-SAMPLE_SIZE = 100# numero de repo na amostra
+SAMPLE_SIZE = 100  # numero de repositorios consultados na API e exibidos na amostra
 
 
 def show_sample( # amostra
     repositories: list[dict[str, Any]],
     collected_at: datetime,
-    sample_size: int = SAMPLE_SIZE, 
+    sample_size: int = SAMPLE_SIZE,
 ) -> None:
     print(f"Data da coleta (UTC): {collected_at.isoformat()}")
     print(f"Amostra para validação: {min(sample_size, len(repositories))} repositórios\n")
@@ -43,13 +44,24 @@ def show_sample( # amostra
         print(f"Issues fechadas/total (RQ06): {repository['closedIssues']}/{repository['totalIssues']} ({repository['closedIssuesRatio']})")
         print("\n")
 
+    print("Métricas por linguagem (RQ07)\n")
+    for language, metrics in extract_rq07_metrics(repositories).items():
+        print(f"Linguagem: {language} ({metrics['repositoryCount']} repositórios)")
+        print(f"  Média de PRs aceitas: {metrics['avgMergedPullRequests']:.2f}")
+        print(f"  Média de releases: {metrics['avgTotalReleases']:.2f}")
+        print(
+            "  Média de dias desde a última atualização: "
+            f"{metrics['avgTimeSinceLastUpdate']:.2f}"
+        )
+        print()
+
 
 def main() -> None:
     try:
         token = get_github_token()
         url = get_github_graphql_url()
         query = load_query(QUERY_PATH)
-        data = execute_query(query, {"first": 5}, token, url)
+        data = execute_query(query, {"first": SAMPLE_SIZE}, token, url)
     except GitHubAPIError as error:
         raise SystemExit(f"Erro: {error}") from error
 
@@ -69,7 +81,7 @@ def main() -> None:
             }
         )
 
-    show_sample(repositories, collected_at)
+    show_sample(repositories, collected_at, SAMPLE_SIZE)
 
 
 if __name__ == "__main__":
