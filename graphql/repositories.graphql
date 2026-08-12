@@ -1,10 +1,15 @@
-query TopRepositories($first: Int!) { # quantidade de repositorios passado por parametro, consulta única
+query TopRepositories($first: Int!, $after: String) { # busca em lotes, ver Issue #13
   search(
     query: "stars:>0 sort:stars-desc"
     type: REPOSITORY
     first: $first
+    after: $after
   ) {
     repositoryCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
     nodes {
       ... on Repository {
         nameWithOwner
