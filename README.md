@@ -29,3 +29,18 @@ Instale as dependências de desenvolvimento e rode a suíte:
 pip install -r requirements-dev.txt
 pytest
 ```
+
+## Snapshot do GitHub Projects — Lab01S01
+
+Configure `GITHUB_PROJECT_OWNER` e `GITHUB_PROJECT_NUMBER` no `.env`. O token
+informado em `GITHUB_TOKEN` precisa de permissão de leitura para Projects v2.
+
+Gere o CSV do fechamento da sprint com:
+
+```bash
+docker compose run --rm app python src/project_snapshot.py
+```
+
+Por padrão, o arquivo é salvo em
+`data/snapshots/kanban_s01.csv`. Cada linha registra a data da coleta,
+o número, link e título da Issue, seu `Status` atual e os responsáveis.

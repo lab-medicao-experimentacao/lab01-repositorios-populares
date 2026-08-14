@@ -11,8 +11,3 @@ venv/
 .idea/
 .vscode/
 .DS_Store
-
-# Dados gerados pela coleta e análise
-data/*
-!data/.gitkeep
-
