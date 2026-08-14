@@ -1,5 +1,7 @@
 # LAB01 — Características de repositórios populares
 
+[![Tests](https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/actions/workflows/tests.yml/badge.svg)](https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/actions/workflows/tests.yml)
+
 Projeto da disciplina Laboratório de Experimentação de Software para coletar e analisar dados dos repositórios mais populares do GitHub por meio da API GraphQL.
 
 ## Sprint atual
