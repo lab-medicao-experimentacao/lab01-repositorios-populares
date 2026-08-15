@@ -1,9 +1,12 @@
 import json
+import logging
 import os
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
+
+logger = logging.getLogger(__name__)
 
 
 class GitHubAPIError(RuntimeError):
@@ -112,6 +115,7 @@ def fetch_repositories(
         )
         search = data["search"]
         repositories.extend(search["nodes"])
+        logger.info("Buscando repositórios... %d/%d", len(repositories), total)
 
         page_info = search["pageInfo"]
         if not page_info["hasNextPage"]:
