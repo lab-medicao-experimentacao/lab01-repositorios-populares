@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+import logging
 
 from github_api import (
     GitHubAPIError,
@@ -23,6 +24,12 @@ from metrics import (
 QUERY_PATH = Path(__file__).resolve().parent.parent / "graphql" / "repositories.graphql"
 SAMPLE_SIZE = 1000  # numero de repositorios consultados na API e exibidos na amostra
 BATCH_SIZE = 10  # tamanho de cada lote da consulta, evita 502/504 do GitHub (ver Issue #13)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S",
+)
 
 
 def show_sample( # amostra
