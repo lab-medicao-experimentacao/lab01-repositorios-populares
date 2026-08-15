@@ -21,7 +21,7 @@ from metrics import (
 
 
 QUERY_PATH = Path(__file__).resolve().parent.parent / "graphql" / "repositories.graphql"
-SAMPLE_SIZE = 100  # numero de repositorios consultados na API e exibidos na amostra
+SAMPLE_SIZE = 1000  # numero de repositorios consultados na API e exibidos na amostra
 BATCH_SIZE = 10  # tamanho de cada lote da consulta, evita 502/504 do GitHub (ver Issue #13)
 
 
