@@ -1,4 +1,5 @@
-import os
+"""Análises descritivas e inferenciais sobre repositórios populares do GitHub."""
+
 from pathlib import Path
 
 import pandas as pd
@@ -62,7 +63,35 @@ def test_mann_whitney_maturity(df: pd.DataFrame) -> None:
     print()
 
 
+# ---------- Teste 3: Kruskal-Wallis H ----------
+def test_kruskal_wallis_languages(df: pd.DataFrame) -> None:
+    """Kruskal-Wallis H comparando mergedPullRequests entre as 3 linguagens mais frequentes."""
+    subset = df[["primaryLanguage", "mergedPullRequests"]].dropna()
+
+    top3 = subset["primaryLanguage"].value_counts().head(3).index.tolist()
+    subset = subset[subset["primaryLanguage"].isin(top3)]
+
+    groups = [
+        group["mergedPullRequests"].values
+        for _, group in subset.groupby("primaryLanguage")
+    ]
+
+    stat, p_value = stats.kruskal(*groups)
+
+    print("=" * 60)
+    print("Teste 3 – Kruskal-Wallis H: mergedPullRequests por linguagem")
+    print("=" * 60)
+    print(f"  Linguagens analisadas: {top3}")
+    for lang in top3:
+        lang_data = subset.loc[subset["primaryLanguage"] == lang, "mergedPullRequests"]
+        print(f"    {lang:>12}: n={len(lang_data)}, mediana={lang_data.median():.1f}")
+    print(f"  H-statistic: {stat:.4f}")
+    print(f"  p-value:     {p_value:.6e}")
+    print()
+
+
 if __name__ == "__main__":
     df = load_dataset()
     test_spearman_age_vs_prs(df)
     test_mann_whitney_maturity(df)
+    test_kruskal_wallis_languages(df)
