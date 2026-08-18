@@ -1,2 +1,4 @@
 pytest
 pydantic==2.11.7
+pandas
+scipy
