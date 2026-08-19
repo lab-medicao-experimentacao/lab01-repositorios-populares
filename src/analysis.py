@@ -16,6 +16,47 @@ def load_dataset() -> pd.DataFrame:
     return pd.read_csv(csv_files[-1])
 
 
+# ---------- Validação de Dados: RQ01 e RQ02 ----------
+def validate_rq01_rq02(df: pd.DataFrame) -> None:
+    """Análise de consistência das colunas ageInDays e mergedPullRequests."""
+    columns = {"ageInDays": "RQ01 – Idade do repositório (dias)",
+               "mergedPullRequests": "RQ02 – Total de PRs aceitos"}
+
+    print("=" * 60)
+    print("Validação de Dados – RQ01 e RQ02")
+    print("=" * 60)
+
+    for col, label in columns.items():
+        series = df[col]
+        total = len(series)
+        n_nulls = series.isna().sum()
+        valid = series.dropna()
+
+        q1 = valid.quantile(0.25)
+        q3 = valid.quantile(0.75)
+        iqr = q3 - q1
+        lower_bound = q1 - 1.5 * iqr
+        upper_bound = q3 + 1.5 * iqr
+        outliers = valid[(valid < lower_bound) | (valid > upper_bound)]
+
+        print(f"\n  {label} ({col})")
+        print(f"  {'-' * 50}")
+        print(f"    Total de registros:    {total}")
+        print(f"    Valores nulos:         {n_nulls} ({100 * n_nulls / total:.1f}%)")
+        print(f"    Mínimo:                {valid.min():.2f}")
+        print(f"    Q1 (25%):              {q1:.2f}")
+        print(f"    Mediana (50%):         {valid.median():.2f}")
+        print(f"    Q3 (75%):              {q3:.2f}")
+        print(f"    Máximo:                {valid.max():.2f}")
+        print(f"    Média:                 {valid.mean():.2f}")
+        print(f"    Desvio padrão:         {valid.std():.2f}")
+        print(f"    IQR:                   {iqr:.2f}")
+        print(f"    Limites outliers:      [{lower_bound:.2f}, {upper_bound:.2f}]")
+        print(f"    Outliers detectados:   {len(outliers)} ({100 * len(outliers) / len(valid):.1f}%)")
+
+    print()
+
+
 # ---------- Teste 1: Correlação de Spearman ----------
 def test_spearman_age_vs_prs(df: pd.DataFrame) -> None:
     """Correlação de Spearman entre idade (dias) e total de PRs aceitos."""
@@ -92,6 +133,7 @@ def test_kruskal_wallis_languages(df: pd.DataFrame) -> None:
 
 if __name__ == "__main__":
     df = load_dataset()
+    validate_rq01_rq02(df)
     test_spearman_age_vs_prs(df)
     test_mann_whitney_maturity(df)
     test_kruskal_wallis_languages(df)
