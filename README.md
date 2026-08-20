@@ -32,6 +32,16 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
+## Dashboard (Streamlit)
+
+Com o CSV de repositórios já coletado (`python src/main.py`), visualize as
+métricas e gráficos das RQ01 a RQ07 com:
+
+```bash
+pip install -r requirements.txt
+streamlit run src/dashboard.py
+```
+
 ## Snapshot do GitHub Projects — Lab01S01
 
 Configure `GITHUB_PROJECT_OWNER` e `GITHUB_PROJECT_NUMBER` no `.env`. O token
