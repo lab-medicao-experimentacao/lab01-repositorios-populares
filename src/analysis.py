@@ -1,6 +1,7 @@
 """Análises descritivas e inferenciais sobre repositórios populares do GitHub."""
 
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 from scipy import stats
@@ -16,141 +17,186 @@ def load_dataset() -> pd.DataFrame:
     return pd.read_csv(csv_files[-1])
 
 
-# ---------- Validação de Dados: RQ01 e RQ02 ----------
-def validate_rq01_rq02(df: pd.DataFrame) -> None:
-    """Análise de consistência das colunas ageInDays e mergedPullRequests."""
-    columns = {"ageInDays": "RQ01 – Idade do repositório (dias)",
-               "mergedPullRequests": "RQ02 – Total de PRs aceitos"}
+def validate_rq01(df: pd.DataFrame) -> dict[str, Any]:
+    """RQ01 – Validação da coluna ageInDays (idade do repositório)."""
+    col = "ageInDays"
+    series = df[col]
+    total = len(series)
+    n_nulls = series.isna().sum()
+    valid = series.dropna()
+
+    q1 = valid.quantile(0.25)
+    q3 = valid.quantile(0.75)
+    iqr = q3 - q1
+    lower_bound = q1 - 1.5 * iqr
+    upper_bound = q3 + 1.5 * iqr
+    outliers = valid[(valid < lower_bound) | (valid > upper_bound)]
 
     print("=" * 60)
-    print("Validação de Dados – RQ01 e RQ02")
+    print("Validação RQ01 – Idade do repositório (ageInDays)")
     print("=" * 60)
-
-    for col, label in columns.items():
-        series = df[col]
-        total = len(series)
-        n_nulls = series.isna().sum()
-        valid = series.dropna()
-
-        q1 = valid.quantile(0.25)
-        q3 = valid.quantile(0.75)
-        iqr = q3 - q1
-        lower_bound = q1 - 1.5 * iqr
-        upper_bound = q3 + 1.5 * iqr
-        outliers = valid[(valid < lower_bound) | (valid > upper_bound)]
-
-        print(f"\n  {label} ({col})")
-        print(f"  {'-' * 50}")
-        print(f"    Total de registros:    {total}")
-        print(f"    Valores nulos:         {n_nulls} ({100 * n_nulls / total:.1f}%)")
-        print(f"    Mínimo:                {valid.min():.2f}")
-        print(f"    Q1 (25%):              {q1:.2f}")
-        print(f"    Mediana (50%):         {valid.median():.2f}")
-        print(f"    Q3 (75%):              {q3:.2f}")
-        print(f"    Máximo:                {valid.max():.2f}")
-        print(f"    Média:                 {valid.mean():.2f}")
-        print(f"    Desvio padrão:         {valid.std():.2f}")
-        print(f"    IQR:                   {iqr:.2f}")
-        print(f"    Limites outliers:      [{lower_bound:.2f}, {upper_bound:.2f}]")
-        print(f"    Outliers detectados:   {len(outliers)} ({100 * len(outliers) / len(valid):.1f}%)")
-
+    print(f"  Total de registros:    {total}")
+    print(f"  Valores nulos:         {n_nulls} ({100 * n_nulls / total:.1f}%)")
+    print(f"  Mínimo:                {valid.min():.2f}")
+    print(f"  Q1 (25%):              {q1:.2f}")
+    print(f"  Mediana (50%):         {valid.median():.2f}")
+    print(f"  Q3 (75%):              {q3:.2f}")
+    print(f"  Máximo:                {valid.max():.2f}")
+    print(f"  Média:                 {valid.mean():.2f}")
+    print(f"  Desvio padrão:         {valid.std():.2f}")
+    print(f"  IQR:                   {iqr:.2f}")
+    print(f"  Limites outliers:      [{lower_bound:.2f}, {upper_bound:.2f}]")
+    print(f"  Outliers detectados:   {len(outliers)} ({100 * len(outliers) / len(valid):.1f}%)")
     print()
 
+    return {"mediana": valid.median(), "media": valid.mean(), "n_nulls": n_nulls}
 
-# ---------- Validação de Dados: RQ03 e RQ04 ----------
-def validate_rq03_rq04(df: pd.DataFrame) -> None:
-    """Análise de consistência das colunas totalReleases e timeSinceLastUpdate."""
-    columns = {"totalReleases": "RQ03 – Total de releases",
-               "timeSinceLastUpdate": "RQ04 – Tempo desde última atualização (dias)"}
+
+def validate_rq02(df: pd.DataFrame) -> dict[str, Any]:
+    """RQ02 – Validação da coluna mergedPullRequests (PRs aceitos)."""
+    col = "mergedPullRequests"
+    series = df[col]
+    total = len(series)
+    n_nulls = series.isna().sum()
+    valid = series.dropna()
+
+    q1 = valid.quantile(0.25)
+    q3 = valid.quantile(0.75)
+    iqr = q3 - q1
+    lower_bound = q1 - 1.5 * iqr
+    upper_bound = q3 + 1.5 * iqr
+    outliers = valid[(valid < lower_bound) | (valid > upper_bound)]
 
     print("=" * 60)
-    print("Validação de Dados – RQ03 e RQ04")
+    print("Validação RQ02 – Total de PRs aceitos (mergedPullRequests)")
     print("=" * 60)
-
-    for col, label in columns.items():
-        series = df[col]
-        total = len(series)
-        n_nulls = series.isna().sum()
-        valid = series.dropna()
-
-        n_zeros = (valid == 0).sum()
-
-        q1 = valid.quantile(0.25)
-        q3 = valid.quantile(0.75)
-        iqr = q3 - q1
-        lower_bound = max(0, q1 - 1.5 * iqr)
-        upper_bound = q3 + 1.5 * iqr
-        outliers = valid[(valid < lower_bound) | (valid > upper_bound)]
-
-        print(f"\n  {label} ({col})")
-        print(f"  {'-' * 50}")
-        print(f"    Total de registros:    {total}")
-        print(f"    Valores nulos:         {n_nulls} ({100 * n_nulls / total:.1f}%)")
-        print(f"    Valores zerados:       {n_zeros} ({100 * n_zeros / len(valid):.1f}%)")
-        print(f"    Mínimo:                {valid.min():.2f}")
-        print(f"    Q1 (25%):              {q1:.2f}")
-        print(f"    Mediana (50%):         {valid.median():.2f}")
-        print(f"    Q3 (75%):              {q3:.2f}")
-        print(f"    Máximo:                {valid.max():.2f}")
-        print(f"    Média:                 {valid.mean():.2f}")
-        print(f"    Desvio padrão:         {valid.std():.2f}")
-        print(f"    IQR:                   {iqr:.2f}")
-        print(f"    Limites outliers:      [{lower_bound:.2f}, {upper_bound:.2f}]")
-        print(f"    Outliers detectados:   {len(outliers)} ({100 * len(outliers) / len(valid):.1f}%)")
-
-    # Inconsistências documentadas
-    no_releases = df[df["totalReleases"] == 0]
-    print(f"\n  Observações:")
-    print(f"    - {len(no_releases)} repositórios ({100 * len(no_releases) / len(df):.1f}%) "
-          f"não possuem nenhuma release registrada.")
-    print(f"      Isso pode indicar projetos que usam outro modelo de distribuição")
-    print(f"      (ex: rolling release, deploy contínuo) ou projetos puramente documentais.")
-
-    all_zero_update = (df["timeSinceLastUpdate"] == 0).sum()
-    print(f"    - {all_zero_update} repositórios ({100 * all_zero_update / len(df):.1f}%) "
-          f"possuem timeSinceLastUpdate = 0,")
-    print(f"      indicando atualização no mesmo dia da coleta. Coluna possui variação")
-    print(f"      insuficiente para categorização binária (Ativo/Dormente).")
+    print(f"  Total de registros:    {total}")
+    print(f"  Valores nulos:         {n_nulls} ({100 * n_nulls / total:.1f}%)")
+    print(f"  Mínimo:                {valid.min():.2f}")
+    print(f"  Q1 (25%):              {q1:.2f}")
+    print(f"  Mediana (50%):         {valid.median():.2f}")
+    print(f"  Q3 (75%):              {q3:.2f}")
+    print(f"  Máximo:                {valid.max():.2f}")
+    print(f"  Média:                 {valid.mean():.2f}")
+    print(f"  Desvio padrão:         {valid.std():.2f}")
+    print(f"  IQR:                   {iqr:.2f}")
+    print(f"  Limites outliers:      [{lower_bound:.2f}, {upper_bound:.2f}]")
+    print(f"  Outliers detectados:   {len(outliers)} ({100 * len(outliers) / len(valid):.1f}%)")
     print()
 
+    return {"mediana": valid.median(), "media": valid.mean(), "n_nulls": n_nulls}
 
-# ---------- Validação de Dados: RQ05 a RQ07 ----------
-def validate_rq05_rq06_rq07(df: pd.DataFrame) -> None:
-    """Validação das colunas primaryLanguage, totalIssues, closedIssues e closedIssuesRatio."""
-    print("=" * 60)
-    print("Validação de Dados – RQ05, RQ06 e RQ07")
-    print("=" * 60)
 
+def validate_rq03(df: pd.DataFrame) -> dict[str, Any]:
+    """RQ03 – Validação da coluna totalReleases."""
+    col = "totalReleases"
+    series = df[col]
+    total = len(series)
+    n_nulls = series.isna().sum()
+    valid = series.dropna()
+    n_zeros = (valid == 0).sum()
+
+    q1 = valid.quantile(0.25)
+    q3 = valid.quantile(0.75)
+    iqr = q3 - q1
+    lower_bound = max(0, q1 - 1.5 * iqr)
+    upper_bound = q3 + 1.5 * iqr
+    outliers = valid[(valid < lower_bound) | (valid > upper_bound)]
+
+    print("=" * 60)
+    print("Validação RQ03 – Total de releases (totalReleases)")
+    print("=" * 60)
+    print(f"  Total de registros:    {total}")
+    print(f"  Valores nulos:         {n_nulls} ({100 * n_nulls / total:.1f}%)")
+    print(f"  Valores zerados:       {n_zeros} ({100 * n_zeros / len(valid):.1f}%)")
+    print(f"  Mínimo:                {valid.min():.2f}")
+    print(f"  Q1 (25%):              {q1:.2f}")
+    print(f"  Mediana (50%):         {valid.median():.2f}")
+    print(f"  Q3 (75%):              {q3:.2f}")
+    print(f"  Máximo:                {valid.max():.2f}")
+    print(f"  Média:                 {valid.mean():.2f}")
+    print(f"  Desvio padrão:         {valid.std():.2f}")
+    print(f"  IQR:                   {iqr:.2f}")
+    print(f"  Limites outliers:      [{lower_bound:.2f}, {upper_bound:.2f}]")
+    print(f"  Outliers detectados:   {len(outliers)} ({100 * len(outliers) / len(valid):.1f}%)")
+    print(f"  Obs: {n_zeros} repos sem releases (podem usar rolling release ou ser documentais)")
+    print()
+
+    return {"mediana": valid.median(), "media": valid.mean(), "n_nulls": n_nulls, "n_zeros": n_zeros}
+
+
+def validate_rq04(df: pd.DataFrame) -> dict[str, Any]:
+    """RQ04 – Validação da coluna timeSinceLastUpdate."""
+    col = "timeSinceLastUpdate"
+    series = df[col]
+    total = len(series)
+    n_nulls = series.isna().sum()
+    valid = series.dropna()
+    n_zeros = (valid == 0).sum()
+
+    q1 = valid.quantile(0.25)
+    q3 = valid.quantile(0.75)
+    iqr = q3 - q1
+    lower_bound = max(0, q1 - 1.5 * iqr)
+    upper_bound = q3 + 1.5 * iqr
+    outliers = valid[(valid < lower_bound) | (valid > upper_bound)]
+
+    print("=" * 60)
+    print("Validação RQ04 – Tempo desde última atualização (timeSinceLastUpdate)")
+    print("=" * 60)
+    print(f"  Total de registros:    {total}")
+    print(f"  Valores nulos:         {n_nulls} ({100 * n_nulls / total:.1f}%)")
+    print(f"  Valores zerados:       {n_zeros} ({100 * n_zeros / len(valid):.1f}%)")
+    print(f"  Mínimo:                {valid.min():.2f}")
+    print(f"  Q1 (25%):              {q1:.2f}")
+    print(f"  Mediana (50%):         {valid.median():.2f}")
+    print(f"  Q3 (75%):              {q3:.2f}")
+    print(f"  Máximo:                {valid.max():.2f}")
+    print(f"  Média:                 {valid.mean():.2f}")
+    print(f"  Desvio padrão:         {valid.std():.2f}")
+    print(f"  IQR:                   {iqr:.2f}")
+    print(f"  Limites outliers:      [{lower_bound:.2f}, {upper_bound:.2f}]")
+    print(f"  Outliers detectados:   {len(outliers)} ({100 * len(outliers) / len(valid):.1f}%)")
+    print(f"  Obs: {n_zeros} repos com valor 0 (atualizados no dia da coleta).")
+    print(f"       Variação insuficiente para categorização binária Ativo/Dormente.")
+    print()
+
+    return {"mediana": valid.median(), "media": valid.mean(), "n_nulls": n_nulls, "n_zeros": n_zeros}
+
+
+def validate_rq05(df: pd.DataFrame) -> dict[str, Any]:
+    """RQ05 – Validação da coluna primaryLanguage."""
     total = len(df)
-
-    # --- RQ05: Linguagem primária ---
-    print(f"\n  RQ05 – Linguagem primária (primaryLanguage)")
-    print(f"  {'-' * 50}")
-    n_nulls_lang = df["primaryLanguage"].isna().sum()
-    n_valid_lang = total - n_nulls_lang
+    n_nulls = df["primaryLanguage"].isna().sum()
+    n_valid = total - n_nulls
     n_unique = df["primaryLanguage"].nunique()
-    top5 = df["primaryLanguage"].value_counts().head(5)
+    lang_counts = df["primaryLanguage"].value_counts()
+    top3_langs = lang_counts.head(3).index.tolist()
 
-    print(f"    Total de registros:    {total}")
-    print(f"    Valores nulos:         {n_nulls_lang} ({100 * n_nulls_lang / total:.1f}%)")
-    print(f"    Linguagens distintas:  {n_unique}")
-    print(f"    Top 5 linguagens:")
-    for lang, count in top5.items():
-        print(f"      {lang:<20} {count:>4} ({100 * count / n_valid_lang:.1f}%)")
+    print("=" * 60)
+    print("Validação RQ05 – Linguagem primária (primaryLanguage)")
+    print("=" * 60)
+    print(f"  Total de registros:    {total}")
+    print(f"  Valores nulos:         {n_nulls} ({100 * n_nulls / total:.1f}%)")
+    print(f"  Linguagens distintas:  {n_unique}")
+    print(f"  Top 5 linguagens:")
+    for lang, count in lang_counts.head(5).items():
+        print(f"    {lang:<20} {count:>4} ({100 * count / n_valid:.1f}%)")
+    print()
 
-    # --- RQ06: Issues e razão de fechamento ---
-    print(f"\n  RQ06 – Issues e razão de fechamento")
-    print(f"  {'-' * 50}")
+    return {
+        "top3_langs": top3_langs,
+        "lang_counts": lang_counts,
+        "n_valid_lang": n_valid,
+    }
 
-    n_nulls_total_issues = df["totalIssues"].isna().sum()
-    n_nulls_closed = df["closedIssues"].isna().sum()
+
+def validate_rq06(df: pd.DataFrame) -> dict[str, Any]:
+    """RQ06 – Validação de totalIssues, closedIssues e closedIssuesRatio."""
+    total = len(df)
     n_nulls_ratio = df["closedIssuesRatio"].isna().sum()
+    n_zero_issues = (df["totalIssues"] == 0).sum()
 
-    # Repos com totalIssues == 0 (divisão por zero na razão)
-    zero_issues = df[df["totalIssues"] == 0]
-    n_zero_issues = len(zero_issues)
-
-    # Verificar consistência: closedIssuesRatio deve ser NaN quando totalIssues == 0
     ratio_when_zero = df.loc[df["totalIssues"] == 0, "closedIssuesRatio"]
     inconsistent = ratio_when_zero.notna().sum()
 
@@ -162,46 +208,55 @@ def validate_rq05_rq06_rq07(df: pd.DataFrame) -> None:
     upper_bound = min(1, q3 + 1.5 * iqr)
     outliers = valid_ratio[(valid_ratio < lower_bound) | (valid_ratio > upper_bound)]
 
-    print(f"    Nulos em totalIssues:      {n_nulls_total_issues}")
-    print(f"    Nulos em closedIssues:     {n_nulls_closed}")
-    print(f"    Nulos em closedIssuesRatio:{n_nulls_ratio} ({100 * n_nulls_ratio / total:.1f}%)")
-    print(f"    Repos com totalIssues = 0: {n_zero_issues} ({100 * n_zero_issues / total:.1f}%)")
-    print(f"    Inconsistências (ratio não-nula com totalIssues=0): {inconsistent}")
-    print(f"    closedIssuesRatio (válidos: {len(valid_ratio)}):")
-    print(f"      Mínimo:    {valid_ratio.min():.4f}")
-    print(f"      Q1:        {q1:.4f}")
-    print(f"      Mediana:   {valid_ratio.median():.4f}")
-    print(f"      Q3:        {q3:.4f}")
-    print(f"      Máximo:    {valid_ratio.max():.4f}")
-    print(f"      Média:     {valid_ratio.mean():.4f}")
-    print(f"      IQR:       {iqr:.4f}")
-    print(f"      Limites:   [{lower_bound:.4f}, {upper_bound:.4f}]")
-    print(f"      Outliers:  {len(outliers)} ({100 * len(outliers) / len(valid_ratio):.1f}%)")
-
-    # --- RQ07: Cruzamento linguagem × PRs (prontidão) ---
-    print(f"\n  RQ07 – Prontidão para agrupamento (linguagem × mergedPullRequests)")
-    print(f"  {'-' * 50}")
-
-    cross = df[["primaryLanguage", "mergedPullRequests"]].dropna()
-    top3 = cross["primaryLanguage"].value_counts().head(3).index.tolist()
-    cross_top3 = cross[cross["primaryLanguage"].isin(top3)]
-
-    print(f"    Registros com ambas colunas preenchidas: {len(cross)}")
-    print(f"    Top 3 linguagens para Kruskal-Wallis: {top3}")
-    for lang in top3:
-        n = len(cross_top3[cross_top3["primaryLanguage"] == lang])
-        print(f"      {lang:<20} n={n}")
-    print(f"    Total para o teste: {len(cross_top3)} registros")
-
+    print("=" * 60)
+    print("Validação RQ06 – Razão de issues fechadas (closedIssuesRatio)")
+    print("=" * 60)
+    print(f"  Total de registros:        {total}")
+    print(f"  Nulos em closedIssuesRatio:{n_nulls_ratio} ({100 * n_nulls_ratio / total:.1f}%)")
+    print(f"  Repos com totalIssues = 0: {n_zero_issues} ({100 * n_zero_issues / total:.1f}%)")
+    print(f"  Inconsistências (ratio válida com totalIssues=0): {inconsistent}")
+    print(f"  closedIssuesRatio (n={len(valid_ratio)}):")
+    print(f"    Mínimo:    {valid_ratio.min():.4f}")
+    print(f"    Q1:        {q1:.4f}")
+    print(f"    Mediana:   {valid_ratio.median():.4f}")
+    print(f"    Q3:        {q3:.4f}")
+    print(f"    Máximo:    {valid_ratio.max():.4f}")
+    print(f"    Média:     {valid_ratio.mean():.4f}")
+    print(f"    IQR:       {iqr:.4f}")
+    print(f"    Limites:   [{lower_bound:.4f}, {upper_bound:.4f}]")
+    print(f"    Outliers:  {len(outliers)} ({100 * len(outliers) / len(valid_ratio):.1f}%)")
     print()
 
+    return {"mediana_razao_issues": valid_ratio.median()}
 
-# ---------- Teste 1: Correlação de Spearman ----------
-def test_spearman_age_vs_prs(df: pd.DataFrame) -> None:
-    """Correlação de Spearman entre idade (dias) e total de PRs aceitos."""
-    cols = ["ageInDays", "mergedPullRequests"]
-    subset = df[cols].dropna()
 
+def validate_rq07(df: pd.DataFrame, top3_langs: list[str]) -> dict[str, Any]:
+    """RQ07 – Prontidão do cruzamento linguagem × mergedPullRequests."""
+    cross = df[["primaryLanguage", "mergedPullRequests"]].dropna()
+    cross_top3 = cross[cross["primaryLanguage"].isin(top3_langs)]
+
+    print("=" * 60)
+    print("Validação RQ07 – Agrupamento linguagem × mergedPullRequests")
+    print("=" * 60)
+    print(f"  Registros com ambas colunas preenchidas: {len(cross)}")
+    print(f"  Top 3 linguagens: {top3_langs}")
+    for lang in top3_langs:
+        n = len(cross_top3[cross_top3["primaryLanguage"] == lang])
+        print(f"    {lang:<20} n={n}")
+    print(f"  Total para o teste: {len(cross_top3)} registros")
+    print()
+
+    return {"n_cross": len(cross_top3)}
+
+
+# ==========================================================
+# Testes inferenciais
+# ==========================================================
+
+
+def test_spearman(df: pd.DataFrame) -> dict[str, float]:
+    """Teste 1 – Correlação de Spearman: ageInDays × mergedPullRequests."""
+    subset = df[["ageInDays", "mergedPullRequests"]].dropna()
     corr, p_value = stats.spearmanr(subset["ageInDays"], subset["mergedPullRequests"])
 
     print("=" * 60)
@@ -211,29 +266,23 @@ def test_spearman_age_vs_prs(df: pd.DataFrame) -> None:
     print(f"  p-value:                       {p_value:.6e}")
     print()
 
+    return {"spearman_rho": corr, "spearman_p_value": p_value}
 
-# ---------- Teste 2: Mann-Whitney U ----------
-def test_mann_whitney_maturity(df: pd.DataFrame) -> None:
-    """Mann-Whitney U comparando razão de issues fechadas entre repos Maduros e Jovens."""
+
+def test_mann_whitney(df: pd.DataFrame) -> dict[str, float]:
+    """Teste 2 – Mann-Whitney U: closedIssuesRatio (Maduro vs Jovem)."""
     subset = df[["ageInDays", "closedIssuesRatio"]].dropna()
-
     median_age = subset["ageInDays"].median()
 
-    subset = subset.assign(
-        maturidade=subset["ageInDays"].apply(
-            lambda d: "Maduro" if d > median_age else "Jovem"
-        )
-    )
-
-    maduros = subset.loc[subset["maturidade"] == "Maduro", "closedIssuesRatio"]
-    jovens = subset.loc[subset["maturidade"] == "Jovem", "closedIssuesRatio"]
+    maduros = subset.loc[subset["ageInDays"] > median_age, "closedIssuesRatio"]
+    jovens = subset.loc[subset["ageInDays"] <= median_age, "closedIssuesRatio"]
 
     stat, p_value = stats.mannwhitneyu(maduros, jovens, alternative="two-sided")
 
     print("=" * 60)
     print("Teste 2 – Mann-Whitney U: closedIssuesRatio (Maduro vs Jovem)")
     print("=" * 60)
-    print(f"  Critério: ageInDays > mediana ({median_age:.0f}) → Maduro; <= mediana → Jovem")
+    print(f"  Critério: ageInDays > mediana ({median_age:.0f}) → Maduro; <= → Jovem")
     print(f"  n(Maduros) = {len(maduros)}")
     print(f"  n(Jovens)  = {len(jovens)}")
     print(f"  Mediana (Maduros): {maduros.median():.4f}")
@@ -242,14 +291,18 @@ def test_mann_whitney_maturity(df: pd.DataFrame) -> None:
     print(f"  p-value:     {p_value:.6e}")
     print()
 
+    return {
+        "mann_whitney_u": stat,
+        "mann_whitney_p_value": p_value,
+        "mediana_razao_maduros": maduros.median(),
+        "mediana_razao_jovens": jovens.median(),
+    }
 
-# ---------- Teste 3: Kruskal-Wallis H ----------
-def test_kruskal_wallis_languages(df: pd.DataFrame) -> None:
-    """Kruskal-Wallis H comparando mergedPullRequests entre as 3 linguagens mais frequentes."""
+
+def test_kruskal_wallis(df: pd.DataFrame, top3_langs: list[str]) -> dict[str, Any]:
+    """Teste 3 – Kruskal-Wallis H: mergedPullRequests por linguagem (top 3)."""
     subset = df[["primaryLanguage", "mergedPullRequests"]].dropna()
-
-    top3 = subset["primaryLanguage"].value_counts().head(3).index.tolist()
-    subset = subset[subset["primaryLanguage"].isin(top3)]
+    subset = subset[subset["primaryLanguage"].isin(top3_langs)]
 
     groups = [
         group["mergedPullRequests"].values
@@ -261,20 +314,109 @@ def test_kruskal_wallis_languages(df: pd.DataFrame) -> None:
     print("=" * 60)
     print("Teste 3 – Kruskal-Wallis H: mergedPullRequests por linguagem")
     print("=" * 60)
-    print(f"  Linguagens analisadas: {top3}")
-    for lang in top3:
+    print(f"  Linguagens analisadas: {top3_langs}")
+    for lang in top3_langs:
         lang_data = subset.loc[subset["primaryLanguage"] == lang, "mergedPullRequests"]
         print(f"    {lang:>12}: n={len(lang_data)}, mediana={lang_data.median():.1f}")
     print(f"  H-statistic: {stat:.4f}")
     print(f"  p-value:     {p_value:.6e}")
     print()
 
+    return {"kruskal_wallis_h": stat, "kruskal_wallis_p_value": p_value}
+
+
+# ==========================================================
+# Exportação consolidada
+# ==========================================================
+
+
+def export_metrics_csv(
+    df: pd.DataFrame,
+    rq01: dict[str, Any],
+    rq02: dict[str, Any],
+    rq03: dict[str, Any],
+    rq04: dict[str, Any],
+    rq05: dict[str, Any],
+    rq06: dict[str, Any],
+    spearman: dict[str, float],
+    mann_whitney: dict[str, float],
+    kruskal: dict[str, Any],
+) -> None:
+    """Consolida métricas de todas as análises e exporta CSV chave-valor."""
+    metrics: dict[str, Any] = {}
+
+    # Medianas descritivas
+    metrics["mediana_idade_dias"] = rq01["mediana"]
+    metrics["mediana_idade_anos"] = round(rq01["mediana"] / 365, 2)
+    metrics["mediana_prs_aceitos"] = rq02["mediana"]
+    metrics["mediana_releases"] = rq03["mediana"]
+    metrics["mediana_dias_atualizacao"] = rq04["mediana"]
+
+    # Top 3 linguagens
+    top3_langs = rq05["top3_langs"]
+    lang_counts = rq05["lang_counts"]
+    n_valid_lang = rq05["n_valid_lang"]
+
+    for i, lang in enumerate(top3_langs, start=1):
+        metrics[f"top{i}_linguagem"] = lang
+        metrics[f"top{i}_percentual"] = round(100 * lang_counts[lang] / n_valid_lang, 2)
+
+    # Mediana razão issues fechadas (%)
+    metrics["mediana_razao_issues_fechadas_pct"] = round(rq06["mediana_razao_issues"] * 100, 2)
+
+    # Medianas agrupadas por top 3 linguagens
+    df_top3 = df[df["primaryLanguage"].isin(top3_langs)]
+    for i, lang in enumerate(top3_langs, start=1):
+        lang_df = df_top3[df_top3["primaryLanguage"] == lang]
+        metrics[f"top{i}_mediana_prs"] = lang_df["mergedPullRequests"].dropna().median()
+        metrics[f"top{i}_mediana_releases"] = lang_df["totalReleases"].dropna().median()
+        metrics[f"top{i}_mediana_dias_atualizacao"] = lang_df["timeSinceLastUpdate"].dropna().median()
+
+    # Testes estatísticos
+    metrics["spearman_rho"] = round(spearman["spearman_rho"], 6)
+    metrics["spearman_p_value"] = spearman["spearman_p_value"]
+
+    metrics["mann_whitney_u"] = mann_whitney["mann_whitney_u"]
+    metrics["mann_whitney_p_value"] = mann_whitney["mann_whitney_p_value"]
+    metrics["mediana_razao_maduros"] = round(mann_whitney["mediana_razao_maduros"], 4)
+    metrics["mediana_razao_jovens"] = round(mann_whitney["mediana_razao_jovens"], 4)
+
+    metrics["kruskal_wallis_h"] = round(kruskal["kruskal_wallis_h"], 4)
+    metrics["kruskal_wallis_p_value"] = kruskal["kruskal_wallis_p_value"]
+
+    # Exportar
+    output_path = DATA_DIR / "metricas_artigo_msr.csv"
+    result_df = pd.DataFrame(list(metrics.items()), columns=["Metrica", "Valor"])
+    result_df.to_csv(output_path, index=False)
+
+    print("=" * 60)
+    print(f"Métricas exportadas → {output_path}")
+    print("=" * 60)
+    print(result_df.to_string(index=False))
+    print()
+
+
+# ==========================================================
+# Execução principal
+# ==========================================================
+
 
 if __name__ == "__main__":
     df = load_dataset()
-    validate_rq01_rq02(df)
-    validate_rq03_rq04(df)
-    validate_rq05_rq06_rq07(df)
-    test_spearman_age_vs_prs(df)
-    test_mann_whitney_maturity(df)
-    test_kruskal_wallis_languages(df)
+
+    # Validações individuais
+    rq01 = validate_rq01(df)
+    rq02 = validate_rq02(df)
+    rq03 = validate_rq03(df)
+    rq04 = validate_rq04(df)
+    rq05 = validate_rq05(df)
+    rq06 = validate_rq06(df)
+    rq07 = validate_rq07(df, top3_langs=rq05["top3_langs"])
+
+    # Testes inferenciais
+    spearman = test_spearman(df)
+    mann_whitney = test_mann_whitney(df)
+    kruskal = test_kruskal_wallis(df, top3_langs=rq05["top3_langs"])
+
+    # Exportação consolidada
+    export_metrics_csv(df, rq01, rq02, rq03, rq04, rq05, rq06, spearman, mann_whitney, kruskal)
