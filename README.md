@@ -6,7 +6,8 @@ Projeto da disciplina Laboratório de Experimentação de Software para coletar 
 
 ## Sprint atual
 
-Na `Lab01S01`, o grupo coletará os dados necessários para as questões de pesquisa nos 100 repositórios com mais estrelas e validará uma amostra de 5 a 10 repositórios.
+Na `Lab01S02`, o grupo coleta os 1.000 repositórios mais populares, exporta os
+dados em CSV, valida as métricas e registra o estado do board ao final da sprint.
 
 ## Fonte de referência — linguagens populares (RQ05)
 
@@ -42,17 +43,20 @@ pip install -r requirements.txt
 streamlit run src/dashboard.py
 ```
 
-## Snapshot do GitHub Projects — Lab01S01
+## Snapshot do GitHub Projects
 
 Configure `GITHUB_PROJECT_OWNER` e `GITHUB_PROJECT_NUMBER` no `.env`. O token
 informado em `GITHUB_TOKEN` precisa de permissão de leitura para Projects v2.
 
-Gere o CSV do fechamento da sprint com:
+Para gerar o CSV de fechamento da `Lab01S02` sem sobrescrever o snapshot anterior:
 
 ```bash
-docker compose run --rm app python src/project_snapshot.py
+docker compose run --rm \
+  -e PROJECT_SNAPSHOT_SPRINT=Lab01S02 \
+  -e PROJECT_SNAPSHOT_PATH=data/snapshots/kanban_s02.csv \
+  app python src/project_snapshot.py
 ```
 
-Por padrão, o arquivo é salvo em
-`data/snapshots/kanban_s01.csv`. Cada linha registra a data da coleta,
-o número, link e título da Issue, seu `Status` atual e os responsáveis.
+Cada linha registra a sprint, a data da coleta, o número, link e título da Issue,
+seu `Status` atual e os responsáveis. Sem as variáveis opcionais acima, o script
+mantém a compatibilidade com a S01 e salva em `data/snapshots/kanban_s01.csv`.

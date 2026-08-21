@@ -2,7 +2,11 @@ import csv
 from datetime import UTC, datetime
 from unittest.mock import patch
 
-from project_snapshot import fetch_project_items, project_rows, write_snapshot
+from project_snapshot import (
+    fetch_project_items,
+    project_rows,
+    write_snapshot,
+)
 
 
 CAPTURED_AT = datetime(2026, 1, 11, 12, 0, tzinfo=UTC)
