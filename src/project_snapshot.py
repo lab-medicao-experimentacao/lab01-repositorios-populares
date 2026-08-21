@@ -15,16 +15,14 @@ from github_api import (
 
 ROOT_PATH = Path(__file__).resolve().parent.parent
 QUERY_PATH = ROOT_PATH / "graphql" / "project_snapshot.graphql"
-DEFAULT_OUTPUT_PATH = (
-    ROOT_PATH / "data" / "snapshots" / "kanban_s01.csv"
-)
 PAGE_SIZE = 100
 
 
-def get_project_config() -> tuple[str, int, Path]:
+def get_project_config() -> tuple[str, int, Path, str]:
     owner = os.getenv("GITHUB_PROJECT_OWNER")
     project_number = os.getenv("GITHUB_PROJECT_NUMBER")
-    output_path = Path(os.getenv("PROJECT_SNAPSHOT_PATH", DEFAULT_OUTPUT_PATH))
+    output_path = Path(os.getenv("PROJECT_SNAPSHOT_PATH"))
+    sprint = os.getenv("PROJECT_SNAPSHOT_SPRINT").strip()
 
     if not owner:
         raise GitHubAPIError(
@@ -41,7 +39,12 @@ def get_project_config() -> tuple[str, int, Path]:
     if number <= 0:
         raise GitHubAPIError("GITHUB_PROJECT_NUMBER deve ser maior que zero.")
 
-    return owner, number, output_path
+    if not sprint:
+        raise GitHubAPIError(
+            "PROJECT_SNAPSHOT_SPRINT não pode ser uma string vazia."
+        )
+
+    return owner, number, output_path, sprint
 
 
 def fetch_project_items(
@@ -145,7 +148,7 @@ def write_snapshot(rows: list[dict[str, Any]], output_path: Path) -> None:
 
 def main() -> None:
     try:
-        owner, project_number, output_path = get_project_config()
+        owner, project_number, output_path, sprint = get_project_config()
         query = load_query(QUERY_PATH)
         project, items = fetch_project_items(
             query,
@@ -154,7 +157,7 @@ def main() -> None:
             get_github_token(),
             get_github_graphql_url(),
         )
-        rows = project_rows(project, items, "Lab01S01", datetime.now(UTC))
+        rows = project_rows(project, items, sprint, datetime.now(UTC))
         write_snapshot(rows, output_path)
     except GitHubAPIError as error:
         raise SystemExit(f"Erro: {error}") from error
