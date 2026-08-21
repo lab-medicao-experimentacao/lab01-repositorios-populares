@@ -1,7 +1,10 @@
-"""Dashboard Streamlit com métricas e gráficos das RQ01 a RQ07."""
+"""Dashboard Streamlit com métricas, gráficos e testes estatísticos das RQ01 a RQ07."""
 
 import sys
+from contextlib import contextmanager
+from datetime import datetime
 
+import altair as alt
 import pandas as pd
 import streamlit as st
 
@@ -10,11 +13,106 @@ import streamlit as st
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-from analysis import load_dataset, test_kruskal_wallis, test_mann_whitney, test_spearman
+from analysis import DATA_DIR, load_dataset, test_kruskal_wallis, test_mann_whitney, test_spearman
 from metrics import extract_rq07_metrics
 
-st.set_page_config(page_title="RQs — Repositórios Populares", layout="wide")
-st.title("Características de repositórios populares — RQ01 a RQ07")
+ACCENT = "#e3b341"
+SURFACE = "#12181f"
+BORDER = "#232b33"
+TEXT = "#e6edf3"
+MUTED = "#8b98a5"
+
+# Cores reais do GitHub Linguist — cada linguagem "veste" sua cor oficial
+# nos gráficos, em vez de uma barra azul genérica.
+LANGUAGE_COLORS = {
+    "Python": "#3572A5",
+    "JavaScript": "#f1e05a",
+    "TypeScript": "#3178c6",
+    "Go": "#00ADD8",
+    "Rust": "#dea584",
+    "Java": "#b07219",
+    "C++": "#f34b7d",
+    "C": "#555555",
+    "C#": "#178600",
+    "Shell": "#89e051",
+    "Jupyter Notebook": "#DA5B0B",
+    "Ruby": "#701516",
+    "PHP": "#4F5D95",
+    "Swift": "#F05138",
+    "Kotlin": "#A97BFF",
+    "Objective-C": "#438eff",
+    "Scala": "#c22d40",
+    "HTML": "#e34c26",
+    "Vue": "#41b883",
+    "Elixir": "#6e4a7e",
+}
+DEFAULT_LANGUAGE_COLOR = "#6e7681"
+
+st.set_page_config(page_title="RQs — Repositórios Populares", layout="wide", page_icon="⭐")
+
+st.markdown(
+    """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+    html, body, [class*="st-emotion"], [class*="css"] {
+        font-family: 'IBM Plex Sans', sans-serif;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'IBM Plex Mono', monospace !important;
+        letter-spacing: -0.01em;
+    }
+
+    [data-testid="stSidebar"] {
+        background: #12181f;
+        border-right: 1px solid #232b33;
+    }
+    [data-testid="stSidebar"] a {
+        color: #8b98a5 !important;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.85rem;
+        text-decoration: none;
+    }
+    [data-testid="stSidebar"] a:hover {
+        color: #e3b341 !important;
+    }
+
+    [data-testid="stMetricValue"] {
+        font-family: 'IBM Plex Mono', monospace;
+    }
+    [data-testid="stMetricLabel"] {
+        font-family: 'IBM Plex Sans', sans-serif;
+        color: #e3b341 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 0.72rem !important;
+    }
+
+    div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div.app-card-marker) {
+        background: #12181f;
+        border: 1px solid #232b33 !important;
+        border-radius: 14px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+        padding: 0.4rem 0.6rem;
+    }
+
+    .eyebrow {
+        font-family: 'IBM Plex Mono', monospace;
+        color: #e3b341;
+        font-size: 0.78rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin: 2.2rem 0 0.4rem;
+    }
+
+    hr {
+        border-color: #232b33 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 try:
     df = load_dataset()
@@ -25,6 +123,65 @@ except FileNotFoundError:
     )
     st.stop()
 
+latest_csv = sorted(DATA_DIR.glob("repositories_*.csv"))[-1]
+collected_at = datetime.strptime(latest_csv.stem.split("_", 1)[1], "%Y%m%d_%H%M%S")
+
+SECTIONS = [
+    ("rq01", "RQ01"),
+    ("rq02", "RQ02"),
+    ("rq03", "RQ03"),
+    ("rq04", "RQ04"),
+    ("rq05", "RQ05"),
+    ("rq06", "RQ06"),
+    ("rq07", "RQ07"),
+    ("testes", "Testes"),
+]
+with st.sidebar:
+    st.markdown(
+        "<div style='font-family:IBM Plex Mono, monospace; font-weight:600; "
+        "color:#e6edf3; font-size:0.95rem; margin-bottom:0.8rem;'>"
+        "⭐ Lab01 — Sumário</div>",
+        unsafe_allow_html=True,
+    )
+    for anchor_id, label in SECTIONS:
+        st.markdown(f"[{label}](#{anchor_id})")
+
+
+def style_chart(chart: alt.Chart) -> alt.Chart:
+    return (
+        chart.properties(height=260, background="transparent")
+        .configure_view(strokeWidth=0)
+        .configure_axis(labelColor=MUTED, titleColor=MUTED, gridColor=BORDER, domainColor=BORDER)
+    )
+
+
+def language_chart(series: pd.Series, y_title: str) -> alt.Chart:
+    data = series.reset_index()
+    data.columns = ["language", "value"]
+    domain = data["language"].tolist()
+    colors = [LANGUAGE_COLORS.get(lang, DEFAULT_LANGUAGE_COLOR) for lang in domain]
+    chart = (
+        alt.Chart(data)
+        .mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3)
+        .encode(
+            x=alt.X("language:N", sort=domain, title=None, axis=alt.Axis(labelAngle=-40)),
+            y=alt.Y("value:Q", title=y_title),
+            color=alt.Color(
+                "language:N", scale=alt.Scale(domain=domain, range=colors), legend=None
+            ),
+            tooltip=["language", "value"],
+        )
+    )
+    return style_chart(chart)
+
+
+@contextmanager
+def card(anchor_id: str):
+    st.markdown(f'<div id="{anchor_id}"></div>', unsafe_allow_html=True)
+    with st.container(border=True):
+        st.markdown('<div class="app-card-marker"></div>', unsafe_allow_html=True)
+        yield
+
 
 def histogram(series: pd.Series, bins: int = 10) -> pd.Series:
     """Conta valores por bin e usa o ponto médio como índice numérico,
@@ -34,73 +191,123 @@ def histogram(series: pd.Series, bins: int = 10) -> pd.Series:
     return counts
 
 
-def show_metric_section(title: str, column: str, as_pct: bool = False) -> None:
-    st.subheader(title)
-    series = df[column]
-    col1, col2 = st.columns(2)
-    if as_pct:
-        col1.metric("Mediana", f"{series.median():.2%}")
-        col2.metric("Média", f"{series.mean():.2%}")
-    else:
-        col1.metric("Mediana", f"{series.median():.1f}")
-        col2.metric("Média", f"{series.mean():.1f}")
-    st.bar_chart(histogram(series))
+def show_metric_section(
+    anchor_id: str, title: str, column: str, as_pct: bool = False
+) -> None:
+    with card(anchor_id):
+        st.subheader(title, anchor=False)
+        series = df[column]
+        col1, col2 = st.columns(2)
+        if as_pct:
+            col1.metric("Mediana", f"{series.median():.2%}")
+            col2.metric("Média", f"{series.mean():.2%}")
+        else:
+            col1.metric("Mediana", f"{series.median():.1f}")
+            col2.metric("Média", f"{series.mean():.1f}")
+        st.bar_chart(histogram(series), color=ACCENT)
 
 
-show_metric_section("RQ01 — Idade do repositório (dias)", "ageInDays")
-show_metric_section("RQ02 — Pull requests aceitas", "mergedPullRequests")
-show_metric_section("RQ03 — Total de releases", "totalReleases")
-show_metric_section("RQ04 — Dias desde a última atualização", "timeSinceLastUpdate")
+# ---------------------------------------------------------------------------
+# Hero
+# ---------------------------------------------------------------------------
 
-st.subheader("RQ05 — Linguagem primária")
-top_languages = df["primaryLanguage"].value_counts().head(10)
-st.bar_chart(top_languages)
-
-show_metric_section("RQ06 — Razão de issues fechadas", "closedIssuesRatio", as_pct=True)
-
-st.subheader("RQ07 — Métricas médias por linguagem (top 3)")
-top3_langs = df["primaryLanguage"].value_counts().head(3).index.tolist()
-rq07_metrics = extract_rq07_metrics(df.to_dict("records"))
-rq07_top3 = pd.DataFrame(
-    {lang: rq07_metrics[lang] for lang in top3_langs if lang in rq07_metrics}
-).T
-
-# Gráficos separados por métrica: cada uma tem uma escala bem diferente
-# (PRs na casa dos milhares, releases nas dezenas, dias em unidades) —
-# um único gráfico empilhado deixaria as menores praticamente invisíveis.
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.caption("Média de PRs aceitas")
-    st.bar_chart(rq07_top3["avgMergedPullRequests"])
-with col2:
-    st.caption("Média de releases")
-    st.bar_chart(rq07_top3["avgTotalReleases"])
-with col3:
-    st.caption("Média de dias desde a última atualização")
-    st.bar_chart(rq07_top3["avgTimeSinceLastUpdate"])
-
-
-# Realça os cards de teste (st.container(border=True)) com sombra e cantos
-# mais suaves — testid estável usado pelo Streamlit para esse componente.
 st.markdown(
-    """
-    <style>
-    div[data-testid="stVerticalBlockBorderWrapper"]:has(div.test-card-marker) {
-        border-radius: 14px;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-        padding: 4px 8px;
-    }
-    </style>
+    f"""
+    <div style="padding: 1.6rem 0 1.2rem;">
+      <div style="font-family:'IBM Plex Mono',monospace; color:{MUTED}; font-size:0.8rem;
+                  letter-spacing:0.12em; text-transform:uppercase; margin-bottom:0.5rem;">
+        ⭐ Lab01 — Laboratório de Experimentação de Software
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:2.3rem;
+                  color:{TEXT}; line-height:1.2;">
+        Características de repositórios <span style="color:{ACCENT};">populares</span>
+      </div>
+      <div style="font-family:'IBM Plex Sans',sans-serif; color:{MUTED}; font-size:1rem;
+                  margin-top:0.6rem; max-width:620px;">
+        Evidências estatísticas sobre idade, contribuição, manutenção e linguagem
+        dos repositórios mais populares do GitHub — RQ01 a RQ07.
+      </div>
+    </div>
     """,
     unsafe_allow_html=True,
 )
+
+with st.container(border=True):
+    st.markdown('<div class="app-card-marker"></div>', unsafe_allow_html=True)
+    kpi1, kpi2, kpi3 = st.columns(3)
+    kpi1.metric("Repositórios analisados", f"{len(df):,}".replace(",", "."))
+    kpi2.metric(
+        "Mediana de estrelas", f"{df['stargazerCount'].median():,.0f}".replace(",", ".")
+    )
+    kpi3.metric("Coleta em", collected_at.strftime("%d/%m/%Y"))
+
+# ---------------------------------------------------------------------------
+# Métricas descritivas
+# ---------------------------------------------------------------------------
+
+st.markdown('<div class="eyebrow">Métricas descritivas</div>', unsafe_allow_html=True)
+
+show_metric_section("rq01", "RQ01 — Idade do repositório (dias)", "ageInDays")
+show_metric_section("rq02", "RQ02 — Pull requests aceitas", "mergedPullRequests")
+show_metric_section("rq03", "RQ03 — Total de releases", "totalReleases")
+show_metric_section("rq04", "RQ04 — Dias desde a última atualização", "timeSinceLastUpdate")
+
+# ---------------------------------------------------------------------------
+# Linguagens
+# ---------------------------------------------------------------------------
+
+st.markdown('<div class="eyebrow">Linguagens</div>', unsafe_allow_html=True)
+
+with card("rq05"):
+    st.subheader("RQ05 — Linguagem primária", anchor=False)
+    top_languages = df["primaryLanguage"].value_counts().head(10)
+    st.altair_chart(
+        language_chart(top_languages, "Repositórios"), use_container_width=True
+    )
+
+show_metric_section("rq06", "RQ06 — Razão de issues fechadas", "closedIssuesRatio", as_pct=True)
+
+with card("rq07"):
+    st.subheader("RQ07 — Métricas médias por linguagem (top 3)", anchor=False)
+    top3_langs = df["primaryLanguage"].value_counts().head(3).index.tolist()
+    rq07_metrics = extract_rq07_metrics(df.to_dict("records"))
+    rq07_top3 = pd.DataFrame(
+        {lang: rq07_metrics[lang] for lang in top3_langs if lang in rq07_metrics}
+    ).T
+
+    # Gráficos separados por métrica: cada uma tem uma escala bem diferente
+    # (PRs na casa dos milhares, releases nas dezenas, dias em unidades) —
+    # um único gráfico empilhado deixaria as menores praticamente invisíveis.
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.caption("Média de PRs aceitas")
+        top3_series = rq07_top3["avgMergedPullRequests"]
+        top3_series.index.name = None
+        st.altair_chart(language_chart(top3_series, ""), use_container_width=True)
+    with col2:
+        st.caption("Média de releases")
+        st.altair_chart(
+            language_chart(rq07_top3["avgTotalReleases"], ""), use_container_width=True
+        )
+    with col3:
+        st.caption("Média de dias desde a última atualização")
+        st.altair_chart(
+            language_chart(rq07_top3["avgTimeSinceLastUpdate"], ""), use_container_width=True
+        )
+
+# ---------------------------------------------------------------------------
+# Testes estatísticos
+# ---------------------------------------------------------------------------
+
+st.markdown('<div id="testes"></div>', unsafe_allow_html=True)
+st.header("Testes estatísticos", anchor=False)
 
 
 def show_test_card(
     icon: str, title: str, hypothesis: str, stats: dict[str, str], p_value: float
 ) -> None:
     with st.container(border=True):
-        st.markdown('<div class="test-card-marker"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="app-card-marker"></div>', unsafe_allow_html=True)
         header_col, badge_col = st.columns([4, 2])
         header_col.markdown(f"##### {icon} {title}")
         with badge_col:
@@ -116,8 +323,6 @@ def show_test_card(
             col.metric(label, value)
         cols[-1].metric("p-value", f"{p_value:.4g}")
 
-
-st.header("Testes estatísticos")
 
 spearman = test_spearman(df)
 show_test_card(
