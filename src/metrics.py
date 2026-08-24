@@ -1,3 +1,4 @@
+import statistics
 from datetime import datetime
 from typing import Any
 
@@ -89,7 +90,9 @@ def extract_rq07_metrics(
     """
     Agrupa PRs aceitas (RQ02), releases (RQ03) e tempo desde a última
     atualização (RQ04) por linguagem primária (RQ05), calculando a média
-    de cada métrica por linguagem.
+    e a mediana de cada métrica por linguagem. A mediana é a medida
+    preferencial para discussão (menos sensível a outliers), mas a média
+    é mantida para referência.
     """
     languages: dict[str, list[dict[str, Any]]] = {}
     for repository in repositories:
@@ -99,10 +102,16 @@ def extract_rq07_metrics(
     result: dict[str, dict[str, Any]] = {}
     for language, repos in languages.items():
         count = len(repos)
+        merged_prs = [r["mergedPullRequests"] for r in repos]
+        releases = [r["totalReleases"] for r in repos]
+        time_since_update = [r["timeSinceLastUpdate"] for r in repos]
         result[language] = {
             "repositoryCount": count,
-            "avgMergedPullRequests": sum(r["mergedPullRequests"] for r in repos) / count,
-            "avgTotalReleases": sum(r["totalReleases"] for r in repos) / count,
-            "avgTimeSinceLastUpdate": sum(r["timeSinceLastUpdate"] for r in repos) / count,
+            "avgMergedPullRequests": sum(merged_prs) / count,
+            "avgTotalReleases": sum(releases) / count,
+            "avgTimeSinceLastUpdate": sum(time_since_update) / count,
+            "medianMergedPullRequests": statistics.median(merged_prs),
+            "medianTotalReleases": statistics.median(releases),
+            "medianTimeSinceLastUpdate": statistics.median(time_since_update),
         }
     return result

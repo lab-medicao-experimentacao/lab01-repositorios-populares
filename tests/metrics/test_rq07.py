@@ -25,12 +25,18 @@ def test_extract_rq07_metrics_groups_results_by_language():
             "avgMergedPullRequests": 10.0,
             "avgTotalReleases": 2.0,
             "avgTimeSinceLastUpdate": 4.0,
+            "medianMergedPullRequests": 10.0,
+            "medianTotalReleases": 2.0,
+            "medianTimeSinceLastUpdate": 4.0,
         },
         "TypeScript": {
             "repositoryCount": 1,
             "avgMergedPullRequests": 20.0,
             "avgTotalReleases": 4.0,
             "avgTimeSinceLastUpdate": 1.0,
+            "medianMergedPullRequests": 20.0,
+            "medianTotalReleases": 4.0,
+            "medianTimeSinceLastUpdate": 1.0,
         },
     }
 
@@ -50,8 +56,25 @@ def test_extract_rq07_metrics_calculates_averages_for_same_language():
             "avgMergedPullRequests": 15.0,
             "avgTotalReleases": 3.0,
             "avgTimeSinceLastUpdate": 5.0,
+            "medianMergedPullRequests": 15.0,
+            "medianTotalReleases": 3.0,
+            "medianTimeSinceLastUpdate": 5.0,
         }
     }
+
+
+# Verifica que mediana e média divergem quando há um outlier (número ímpar de repositórios).
+def test_extract_rq07_metrics_median_differs_from_average_with_outlier():
+    repositories = [
+        _repository("Python", 10, 2, 4),
+        _repository("Python", 20, 4, 6),
+        _repository("Python", 300, 4, 6),
+    ]
+
+    result = extract_rq07_metrics(repositories)
+
+    assert result["Python"]["avgMergedPullRequests"] == 110.0
+    assert result["Python"]["medianMergedPullRequests"] == 20.0
 
 
 # Verifica o agrupamento de repositórios sem linguagem definida.
@@ -66,6 +89,9 @@ def test_extract_rq07_metrics_groups_repositories_without_language():
             "avgMergedPullRequests": 5.0,
             "avgTotalReleases": 1.0,
             "avgTimeSinceLastUpdate": 3.0,
+            "medianMergedPullRequests": 5.0,
+            "medianTotalReleases": 1.0,
+            "medianTimeSinceLastUpdate": 3.0,
         }
     }
 

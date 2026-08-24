@@ -60,10 +60,16 @@ def show_sample(
     for language, metrics in extract_rq07_metrics([r.model_dump() for r in repositories]).items():
         print(f"Linguagem: {language} ({metrics['repositoryCount']} repositórios)")
         print(f"  Média de PRs aceitas: {metrics['avgMergedPullRequests']:.2f}")
+        print(f"  Mediana de PRs aceitas: {metrics['medianMergedPullRequests']:.2f}")
         print(f"  Média de releases: {metrics['avgTotalReleases']:.2f}")
+        print(f"  Mediana de releases: {metrics['medianTotalReleases']:.2f}")
         print(
             "  Média de dias desde a última atualização: "
             f"{metrics['avgTimeSinceLastUpdate']:.2f}"
+        )
+        print(
+            "  Mediana de dias desde a última atualização: "
+            f"{metrics['medianTimeSinceLastUpdate']:.2f}"
         )
         print()
 
