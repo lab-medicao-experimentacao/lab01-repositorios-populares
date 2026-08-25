@@ -237,6 +237,12 @@ Para contornar os limites de paginação da API, o \textit{script} implementou r
 
 Conforme o planejamento das \textit{Sprints}, cada membro da equipe validou individualmente o \textit{dataset} referente às suas Questões de Pesquisa (RQs). Durante esta etapa de sanitização, analisou-se a distribuição dos dados e a presença de \textit{outliers}. Optamos por \textbf{manter todos os \textit{outliers}} identificados pelo critério do intervalo interquartil (IQR), uma vez que valores extremos em métricas de repositórios populares (ex: projetos com dezenas de milhares de \textit{pull requests}) refletem fenômenos legítimos do ecossistema e não erros de coleta. A escolha por métodos estatísticos não-paramétricos, baseados na mediana e em ordenações, torna a análise robusta a esses valores extremos sem a necessidade de descartá-los. Repositórios com valores ausentes em métricas críticas (como ausência de \textit{issues} rastreáveis) foram tratados para evitar divisões por zero, garantindo a integridade dos cálculos das medianas e dos testes não-paramétricos subsequentes.
 
+\subsection{Verificação e qualidade do software}
+
+A implementação foi acompanhada por uma suíte automatizada de testes desenvolvida com o \textit{framework} \texttt{pytest}. Os testes verificam o cálculo das métricas das RQ01 a RQ07, incluindo casos-limite como ausência de linguagem primária, \textit{issues}, \textit{releases} ou \textit{pull requests}. A suíte também cobre o uso dos cursores na paginação da coleta de repositórios e dos itens do GitHub Projects, além da transformação dos dados do quadro e da escrita dos \textit{snapshots} em arquivos CSV. Dependências específicas de desenvolvimento são mantidas separadamente e a configuração do \texttt{pytest} define os diretórios de código e de testes utilizados pelo projeto.
+
+Antes da exportação para CSV, cada registro coletado é validado por um modelo Pydantic, que explicita os nomes e tipos esperados para os campos das métricas e impede que registros incompatíveis com essa estrutura sejam exportados silenciosamente.
+
 
 % --- SEÇÃO III: RESULTADOS POR RQ ---
 \section{Resultados}
@@ -253,6 +259,10 @@ A análise descritiva dos 1.000 repositórios coletados retornou os seguintes re
     \item \textbf{RQ06 (Taxa de \textit{issues} fechadas):} A mediana da razão entre \textit{issues} fechadas e o total de \textit{issues} é de \textbf{87,5\%}.
     \item \textbf{RQ07 (Cruzamento de Linguagem vs. Engajamento):} Filtrando os sistemas pelas linguagens mais populares identificadas, observamos as seguintes medianas para \textit{pull requests}, \textit{releases} e dias desde a última atualização, respectivamente: \textbf{Python} (559,5 PRs; 20,5 \textit{releases}; 0 dias), \textbf{TypeScript} (1.990,5 PRs; 134 \textit{releases}; 0 dias) e \textbf{JavaScript} (630,5 PRs; 39 \textit{releases}; 0 dias).
 \end{itemize}
+
+\subsection{Visualização interativa dos resultados}
+
+Como apoio à exploração dos dados, foi desenvolvido um \textit{dashboard} para execução local com o \textit{framework} Streamlit. A aplicação lê o arquivo CSV mais recente produzido pela coleta e apresenta indicadores gerais, medidas descritivas e gráficos das RQ01 a RQ07. A manipulação tabular é realizada com Pandas e as visualizações por linguagem utilizam Altair. O painel também exibe os resultados dos testes de Spearman, Mann--Whitney e Kruskal--Wallis, indicando se o valor-p obtido é estatisticamente significativo para o nível de 5\%. Dessa forma, o \textit{dashboard} complementa as tabelas e valores consolidados no relatório com uma forma interativa de inspecionar as distribuições e comparações entre linguagens.
 
 
 % --- SEÇÃO IV: DISCUSSÃO HIPÓTESE VS. RESULTADO ---
@@ -287,6 +297,16 @@ Para validar matematicamente as dinâmicas de engenharia de \textit{software} su
 Para gerenciar o fluxo de trabalho durante as \textit{sprints}, a equipe utilizou o \textit{GitHub Projects (v2)} seguindo os princípios da metodologia Kanban. 
 
 O quadro foi estruturado com as colunas \texttt{Backlog}, \texttt{To Do}, \texttt{Doing}, \texttt{Review} e \texttt{Done}. Para garantir o foco e mitigar o acúmulo de tarefas, implementamos uma política de \textit{Work in Progress} (WIP) restrita à coluna \texttt{Doing}, permitindo um limite máximo de \textbf{3 \textit{cards}} simultâneos (correspondente a uma tarefa por membro da equipe em andamento por vez).
+
+Para centralizar os trabalhos da disciplina, nossa equipe criou uma organização no GitHub, na qual pretende manter um repositório para cada laboratório. Essa estrutura concentra o código, as \textit{Issues}, os quadros e as permissões dos integrantes em um espaço compartilhado, em vez de vinculá-los à conta pessoal de apenas um membro.
+
+\subsection{Revisão de código e proteção da branch principal}
+
+A \textit{branch} \texttt{main} foi protegida contra integração direta de alterações. Toda mudança deve ser submetida por meio de uma \textit{pull request} e receber ao menos uma revisão aprovada de outro integrante. Depois da aprovação e das demais verificações obrigatórias, o \textit{merge} pode ser realizado pelo revisor ou por outro membro autorizado da organização, mas não pelo autor da \textit{pull request}. Essa revisão cruzada acrescenta uma etapa de verificação por pares e distribui entre os integrantes o conhecimento sobre as alterações incorporadas ao projeto.
+
+\subsection{Integração contínua}
+
+O repositório utiliza GitHub Actions para executar automaticamente a suíte de testes. O \textit{workflow} é acionado tanto em \textit{pull requests} destinadas à \texttt{main} quanto em atualizações dessa \textit{branch}; nele, um ambiente Ubuntu configura o Python 3.12, instala as dependências de desenvolvimento e executa o comando \texttt{pytest}. O resultado dessa execução é uma verificação obrigatória da \textit{pull request}: caso algum teste falhe, o \textit{merge} permanece bloqueado. A automação caracteriza uma prática de integração contínua (CI), pois valida cada alteração candidata antes que ela seja incorporada à linha principal do projeto.
 
 A rastreabilidade foi mantida exigindo que todos os \textit{commits} do repositório mencionassem a respectiva \textit{Issue} de origem. Além disso, ao término de cada ciclo (S01, S02 e S03), o estado do quadro foi exportado para \textit{snapshots} em formato \texttt{.csv}, refletindo o fluxo real da equipe.
 
