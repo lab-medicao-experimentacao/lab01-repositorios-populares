@@ -192,7 +192,11 @@ def histogram(series: pd.Series, bins: int = 10) -> pd.Series:
 
 
 def show_metric_section(
-    anchor_id: str, title: str, column: str, as_pct: bool = False
+    anchor_id: str,
+    title: str,
+    column: str,
+    as_pct: bool = False,
+    hypothesis: str | None = None,
 ) -> None:
     with card(anchor_id):
         st.subheader(title, anchor=False)
@@ -205,6 +209,10 @@ def show_metric_section(
             col1.metric("Mediana", f"{series.median():.1f}")
             col2.metric("Média", f"{series.mean():.1f}")
         st.bar_chart(histogram(series), color=ACCENT)
+        if hypothesis:
+            median_display = f"{series.median():.2%}" if as_pct else f"{series.median():.1f}"
+            st.caption(f"**Hipótese (S02):** {hypothesis}")
+            st.caption(f"**Resultado observado:** mediana de {median_display}.")
 
 
 # ---------------------------------------------------------------------------
@@ -260,40 +268,85 @@ st.markdown('<div class="eyebrow">Linguagens</div>', unsafe_allow_html=True)
 
 with card("rq05"):
     st.subheader("RQ05 — Linguagem primária", anchor=False)
-    top_languages = df["primaryLanguage"].value_counts().head(10)
+    lang_counts = df["primaryLanguage"].value_counts()
+    top_languages = lang_counts.head(10)
     st.altair_chart(
         language_chart(top_languages, "Repositórios"), use_container_width=True
     )
+    n_valid_lang = df["primaryLanguage"].notna().sum()
+    top3_pct = ", ".join(
+        f"{lang} ({100 * count / n_valid_lang:.1f}%)"
+        for lang, count in lang_counts.head(3).items()
+    )
+    st.caption(
+        "**Hipótese (S02):** a maioria dos repositórios populares é escrita em "
+        "linguagens consolidadas de mercado (ex.: Python, JavaScript, Java, C++)."
+    )
+    st.caption(f"**Resultado observado:** hipótese confirmada — top 3: {top3_pct}.")
 
-show_metric_section("rq06", "RQ06 — Razão de issues fechadas", "closedIssuesRatio", as_pct=True)
+show_metric_section(
+    "rq06",
+    "RQ06 — Razão de issues fechadas",
+    "closedIssuesRatio",
+    as_pct=True,
+    hypothesis=(
+        "existe uma alta proporção de issues fechadas em relação ao total, "
+        "indicando governança técnica sólida e capacidade de resposta da equipe mantenedora."
+    ),
+)
 
 with card("rq07"):
-    st.subheader("RQ07 — Métricas médias por linguagem (top 3)", anchor=False)
+    st.subheader("RQ07 — Métricas por linguagem (top 3)", anchor=False)
     top3_langs = df["primaryLanguage"].value_counts().head(3).index.tolist()
     rq07_metrics = extract_rq07_metrics(df.to_dict("records"))
     rq07_top3 = pd.DataFrame(
         {lang: rq07_metrics[lang] for lang in top3_langs if lang in rq07_metrics}
     ).T
 
+    def median_caption(median_column: str) -> str:
+        return "Mediana — " + " · ".join(
+            f"{lang}: {rq07_top3.loc[lang, median_column]:.1f}"
+            for lang in top3_langs
+            if lang in rq07_top3.index
+        )
+
     # Gráficos separados por métrica: cada uma tem uma escala bem diferente
     # (PRs na casa dos milhares, releases nas dezenas, dias em unidades) —
     # um único gráfico empilhado deixaria as menores praticamente invisíveis.
+    # A mediana é exibida junto (texto) por ser mais robusta a outliers que a média.
     col1, col2, col3 = st.columns(3)
     with col1:
         st.caption("Média de PRs aceitas")
         top3_series = rq07_top3["avgMergedPullRequests"]
         top3_series.index.name = None
         st.altair_chart(language_chart(top3_series, ""), use_container_width=True)
+        st.caption(median_caption("medianMergedPullRequests"))
     with col2:
         st.caption("Média de releases")
         st.altair_chart(
             language_chart(rq07_top3["avgTotalReleases"], ""), use_container_width=True
         )
+        st.caption(median_caption("medianTotalReleases"))
     with col3:
         st.caption("Média de dias desde a última atualização")
         st.altair_chart(
             language_chart(rq07_top3["avgTimeSinceLastUpdate"], ""), use_container_width=True
         )
+        st.caption(median_caption("medianTimeSinceLastUpdate"))
+
+    st.divider()
+    top_prs_lang = rq07_top3["medianMergedPullRequests"].astype(float).idxmax()
+    st.caption(
+        "**Hipótese (S02):** projetos escritos nas linguagens mais populares recebem mais "
+        "contribuições externas, lançam mais releases e são atualizados com mais frequência."
+    )
+    st.caption(
+        f"**Resultado observado:** parcialmente confirmada — entre as top 3 linguagens, "
+        f"{top_prs_lang} concentra a maior mediana de PRs aceitos, mas a liderança em volume "
+        "de repositórios (linguagem mais frequente) não coincide necessariamente com a maior "
+        "mediana de engajamento por projeto. Ver teste de Kruskal-Wallis abaixo para a "
+        "significância estatística da diferença entre linguagens."
+    )
 
 # ---------------------------------------------------------------------------
 # Testes estatísticos
