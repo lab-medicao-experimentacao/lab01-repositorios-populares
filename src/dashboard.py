@@ -276,6 +276,28 @@ show_metric_section(
         "a última atualização é indicativo de um projeto vivo e com manutenção ativa."
     ),
 )
+show_metric_section(
+    "rq01",
+    "RQ01 — Idade do repositório (dias)",
+    "ageInDays",
+    hypothesis=(
+        "projetos populares tendem a ser antigos — a construção de uma comunidade "
+        "engajada e a consolidação de uma base de código estável exigem anos de "
+        "desenvolvimento contínuo."
+    ),
+)
+show_metric_section(
+    "rq02",
+    "RQ02 — Pull requests aceitas",
+    "mergedPullRequests",
+    hypothesis=(
+        "sistemas populares recebem um alto volume de pull requests — a alta "
+        "visibilidade atrai um ecossistema global de desenvolvedores dispostos a "
+        "corrigir bugs e propor features."
+    ),
+)
+show_metric_section("rq03", "RQ03 — Total de releases", "totalReleases")
+show_metric_section("rq04", "RQ04 — Dias desde a última atualização", "timeSinceLastUpdate")
 
 # ---------------------------------------------------------------------------
 # Linguagens
