@@ -65,7 +65,7 @@
 \titulo{Relatório final do laboratório 01 de medição e experimentação de software}
 \autor{Gabriel Nogueira Vieira Resende \and Vitor Costa Vianna \and Joaquim Guilherme de Carvalho Vilela Silva}
 \local{Brasil}
-\data{2026, v-1.0.0}
+\data{2026, v-2.0.0}
 % ---
 
 % ---
@@ -237,6 +237,15 @@ Para contornar os limites de paginação da API, o \textit{script} implementou r
 
 Conforme o planejamento das \textit{Sprints}, cada membro da equipe validou individualmente o \textit{dataset} referente às suas Questões de Pesquisa (RQs). Durante esta etapa de sanitização, analisou-se a distribuição dos dados e a presença de \textit{outliers}. Optamos por \textbf{manter todos os \textit{outliers}} identificados pelo critério do intervalo interquartil (IQR), uma vez que valores extremos em métricas de repositórios populares (ex: projetos com dezenas de milhares de \textit{pull requests}) refletem fenômenos legítimos do ecossistema e não erros de coleta. A escolha por métodos estatísticos não-paramétricos, baseados na mediana e em ordenações, torna a análise robusta a esses valores extremos sem a necessidade de descartá-los. Repositórios com valores ausentes em métricas críticas (como ausência de \textit{issues} rastreáveis) foram tratados para evitar divisões por zero, garantindo a integridade dos cálculos das medianas e dos testes não-paramétricos subsequentes.
 
+A \autoref{fig:qq_prs} evidencia visualmente o desvio da normalidade da variável \textit{pull requests} aceitos, sustentando empiricamente a escolha metodológica pelos testes não-paramétricos: ainda que aplicada a transformação $\log(1+x)$, os pontos amostrais afastam-se significativamente da reta de referência gaussiana.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\linewidth]{images/qq_plot_prs.png}
+    \caption{Q-Q plot de \textit{pull requests} aceitos comparando os quantis amostrais aos quantis teóricos da distribuição normal, em escala linear e após transformação logarítmica.}
+    \label{fig:qq_prs}
+\end{figure}
+
 \subsection{Verificação e qualidade do software}
 
 A implementação foi acompanhada por uma suíte automatizada de testes desenvolvida com o \textit{framework} \texttt{pytest}. Os testes verificam o cálculo das métricas das RQ01 a RQ07, incluindo casos-limite como ausência de linguagem primária, \textit{issues}, \textit{releases} ou \textit{pull requests}. A suíte também cobre o uso dos cursores na paginação da coleta de repositórios e dos itens do GitHub Projects, além da transformação dos dados do quadro e da escrita dos \textit{snapshots} em arquivos CSV. Dependências específicas de desenvolvimento são mantidas separadamente e a configuração do \texttt{pytest} define os diretórios de código e de testes utilizados pelo projeto.
@@ -264,6 +273,60 @@ A análise descritiva dos 1.000 repositórios coletados retornou os seguintes re
 
 Como apoio à exploração dos dados, foi desenvolvido um \textit{dashboard} para execução local com o \textit{framework} Streamlit. A aplicação lê o arquivo CSV mais recente produzido pela coleta e apresenta indicadores gerais, medidas descritivas e gráficos das RQ01 a RQ07. A manipulação tabular é realizada com Pandas e as visualizações por linguagem utilizam Altair. O painel também exibe os resultados dos testes de Spearman, Mann--Whitney e Kruskal--Wallis, indicando se o valor-p obtido é estatisticamente significativo para o nível de 5\%. Dessa forma, o \textit{dashboard} complementa as tabelas e valores consolidados no relatório com uma forma interativa de inspecionar as distribuições e comparações entre linguagens.
 
+\subsection{Distribuições descritivas por RQ}
+\label{subsec:distribuicoes_descritivas}
+
+As Figuras~\ref{fig:rq01_age} a~\ref{fig:rq07_top3} apresentam as distribuições subjacentes às métricas descritivas de cada Questão de Pesquisa, extraídas do \textit{dashboard} interativo. Em conjunto, reforçam visualmente a natureza fortemente assimétrica dos dados e justificam a escolha da mediana como medida de tendência central.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\linewidth]{images/rq01_age_histogram.png}
+    \caption{RQ01 --- Distribuição da idade dos repositórios em dias.}
+    \label{fig:rq01_age}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\linewidth]{images/rq02_prs_histogram.png}
+    \caption{RQ02 --- Distribuição do total de \textit{pull requests} aceitos.}
+    \label{fig:rq02_prs}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\linewidth]{images/rq03_releases_histogram.png}
+    \caption{RQ03 --- Distribuição do total de \textit{releases}.}
+    \label{fig:rq03_releases}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\linewidth]{images/rq04_update_histogram.png}
+    \caption{RQ04 --- Distribuição dos dias desde a última atualização.}
+    \label{fig:rq04_update}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\linewidth]{images/rq05_top_languages.png}
+    \caption{RQ05 --- Dez linguagens primárias mais frequentes na amostra.}
+    \label{fig:rq05_languages}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\linewidth]{images/rq06_issues_ratio.png}
+    \caption{RQ06 --- Distribuição da razão de \textit{issues} fechadas.}
+    \label{fig:rq06_issues}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{images/rq07_top3_metrics.png}
+    \caption{RQ07 --- Médias de \textit{pull requests} aceitos, \textit{releases} e dias desde a última atualização por top 3 linguagens (Python, TypeScript, JavaScript).}
+    \label{fig:rq07_top3}
+\end{figure}
+
 
 % --- SEÇÃO IV: DISCUSSÃO HIPÓTESE VS. RESULTADO ---
 \section{Discussão: Hipóteses vs. Resultados}
@@ -272,22 +335,61 @@ Como apoio à exploração dos dados, foi desenvolvido um \textit{dashboard} par
 Nesta seção, confrontamos as hipóteses informais preestabelecidas com os resultados descritivos, e aprofundamos a análise com os testes estatísticos inferenciais adotados.
 
 \subsection{Análise Descritiva (RQs 1 a 7)}
+
+A \autoref{fig:timeline} complementa a análise da RQ01, mostrando a distribuição anual de criação dos repositórios populares. A concentração em torno de 2013--2018 evidencia que a popularidade está fortemente associada à sobrevivência de projetos criados em um ``período de ouro'' do GitHub, quando o ecossistema \textit{open-source} ganhou escala global.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\linewidth]{images/timeline_created_at.png}
+    \caption{Distribuição anual da data de criação dos repositórios populares (\textit{createdAt}).}
+    \label{fig:timeline}
+\end{figure}
+
 \begin{itemize}
     \item \textbf{RQ01 e RQ02:} A hipótese de que projetos populares são antigos e engajados foi \textbf{confirmada}, dado que a mediana de idade é de \textbf{7,73 anos} e a mediana de \textit{pull requests} aceitos é de \textbf{765,5}, valores compatíveis com projetos consolidados e com comunidades ativas.
     \item \textbf{RQ03 e RQ04:} A expectativa de manutenção constante foi \textbf{confirmada}, observando-se um intervalo mediano de atualização de apenas \textbf{0 dias} (i.e., a maioria absoluta dos repositórios foi atualizada no mesmo dia da coleta). Além disso, a mediana de 40 \textit{releases} corrobora a adoção de práticas contínuas de entrega.
-    \item \textbf{RQ05, RQ06 e RQ07:} A suposição sobre o domínio de linguagens de mercado foi \textbf{confirmada}, com liderança de \textbf{Python} (24,97\%), seguido por \textbf{TypeScript} (19,06\%) e \textbf{JavaScript} (12,05\%). A governança se mostrou \textbf{eficiente}, com \textbf{87,5\%} de taxa mediana de resolução de \textit{issues}. Ainda que a hipótese sobre linguagens de mercado tenha sido confirmada, o cruzamento da RQ07 revelou que \textit{TypeScript} apresenta a maior mediana de PRs aceitos (1.990,5), sugerindo que o domínio quantitativo não se traduz linearmente em engajamento por projeto.
+    \item \textbf{RQ05 e RQ06:} A suposição da RQ05 sobre o domínio de linguagens de mercado foi \textbf{confirmada}, com liderança de \textbf{Python} (24,97\%), seguido por \textbf{TypeScript} (19,06\%) e \textbf{JavaScript} (12,05\%). A hipótese da RQ06 sobre governança eficiente também foi \textbf{confirmada}, com \textbf{87,5\%} de taxa mediana de resolução de \textit{issues}.
+    \item \textbf{RQ07:} A hipótese informal de que ``as linguagens mais populares recebem mais contribuições externas'' foi \textbf{refutada}. Embora Python seja a linguagem mais frequente na amostra (24,97\%), ela apresenta a \textbf{menor} mediana de \textit{pull requests} por projeto entre as três (559,5), enquanto TypeScript, apesar de menos frequente (19,06\%), lidera em contribuições (1.990,5). Isso indica que popularidade em número de repositórios e volume de contribuições por projeto são fenômenos independentes, provavelmente influenciados pelo perfil dos projetos escritos em cada linguagem (ferramentas de infraestrutura, \textit{frameworks} \textit{web}, bibliotecas científicas, etc.).
 \end{itemize}
 
 \subsection{Análise Inferencial}
 Para validar matematicamente as dinâmicas de engenharia de \textit{software} sugeridas, aplicamos estatística não-paramétrica \cite{borges2016understanding}:
 
 \begin{itemize}
-    \item \textbf{Idade vs. Engajamento (Spearman):} O teste de correlação de Spearman revelou $\rho = 0{,}226$ com valor-p $\approx 4{,}31 \times 10^{-13}$. Portanto, \textbf{rejeitamos} a hipótese nula, indicando que \textbf{existe} correlação monotônica positiva e estatisticamente significativa entre maturidade e volume de \textit{pull requests}. A magnitude do coeficiente ($\rho \approx 0{,}23$) sugere, contudo, uma associação de intensidade fraca a moderada: a idade contribui para explicar o engajamento, mas não é o fator dominante.
+    \item \textbf{Idade vs. Engajamento (Spearman):} O teste de correlação de Spearman revelou $\rho = 0{,}226$ com valor-p $\approx 4{,}31 \times 10^{-13}$. Como o valor-p é substancialmente inferior ao nível de significância adotado ($\alpha = 0{,}05$), \textbf{rejeitamos} a hipótese nula, concluindo que existe correlação monotônica positiva e estatisticamente significativa entre maturidade e volume de \textit{pull requests}. A magnitude do coeficiente ($\rho \approx 0{,}23$) sugere, contudo, uma associação de intensidade fraca a moderada: a idade contribui para explicar o engajamento, mas não é o fator dominante. A \autoref{fig:spearman_scatter} materializa essa relação exibindo cada repositório como um ponto e a mediana de PRs por decil de idade como linha de tendência, enquanto a \autoref{fig:heatmap} contextualiza o resultado ao apresentar a matriz completa de correlações de Spearman entre as métricas do estudo.
     
-    \item \textbf{Maturidade vs. Resolução de \textit{Issues} (Mann-Whitney U):} Ao comparar repositórios ``Maduros'' (idade $>$ mediana) e ``Jovens'' (idade $\le$ mediana), obtivemos $U = 139.072$ com valor-p $\approx 8{,}83 \times 10^{-9}$. Isso demonstra estatisticamente que a taxa de fechamento de \textit{issues} \textbf{é diferente} entre os dois grupos. As medianas revelam a direção do efeito: repositórios maduros apresentam mediana de \textbf{0,9094}, enquanto os jovens apresentam \textbf{0,8330}, sugerindo que projetos mais antigos tendem a manter uma governança de \textit{issues} mais eficiente.
+    \item \textbf{Maturidade vs. Resolução de \textit{Issues} (Mann-Whitney U):} Ao comparar repositórios ``Maduros'' (idade $>$ mediana) e ``Jovens'' (idade $\le$ mediana), obtivemos $U = 139.072$ com valor-p $\approx 8{,}83 \times 10^{-9}$. Como o valor-p é substancialmente inferior ao nível de significância adotado ($\alpha = 0{,}05$), \textbf{rejeitamos} a hipótese nula, concluindo que a mediana da razão de \textit{issues} fechadas é estatisticamente diferente entre os dois grupos. As medianas revelam a direção do efeito: repositórios maduros apresentam mediana de \textbf{0,9094}, enquanto os jovens apresentam \textbf{0,8330}, sugerindo que projetos mais antigos tendem a manter uma governança de \textit{issues} mais eficiente. A \autoref{fig:mann_whitney} sintetiza essa diferença em um painel duplo: o boxplot pareado (à esquerda) evidencia a separação das medianas e a sobreposição parcial dos IQRs, enquanto as ECDFs sobrepostas (à direita) demonstram a dominância estocástica dos Maduros sobre os Jovens em quase toda a faixa de valores.
     
-    \item \textbf{Linguagens vs. Engajamento (Kruskal-Wallis H):} A comparação do volume de PRs entre as três linguagens mais frequentes (Python, TypeScript e JavaScript) retornou $H = 48{,}44$ com valor-p $\approx 3{,}03 \times 10^{-11}$, evidenciando que a linguagem primária \textbf{influencia} o engajamento da comunidade de forma estatisticamente significativa. Consistentemente com a análise descritiva, TypeScript concentra a maior mediana de PRs (1.990,5) frente a Python (559,5) e JavaScript (630,5), indicando um ecossistema com padrões distintos de contribuição.
+    \item \textbf{Linguagens vs. Engajamento (Kruskal-Wallis H):} A comparação do volume de PRs entre as três linguagens mais frequentes (Python, TypeScript e JavaScript) retornou $H = 48{,}44$ com valor-p $\approx 3{,}03 \times 10^{-11}$. Como o valor-p é significativamente inferior ao nível de significância adotado ($\alpha = 0{,}05$), \textbf{rejeitamos} a hipótese nula, concluindo que ao menos uma das linguagens possui mediana de \textit{pull requests} estatisticamente diferente das demais. Consistentemente com a análise descritiva, TypeScript concentra a maior mediana de PRs (1.990,5) frente a Python (559,5) e JavaScript (630,5), indicando um ecossistema com padrões distintos de contribuição. A \autoref{fig:ridge} torna essa diferença tangível, exibindo as distribuições completas de PRs por linguagem em \textit{ridge plot} sobre escala logarítmica.
 \end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\linewidth]{images/spearman_scatter.png}
+    \caption{Dispersão entre idade do repositório e \textit{pull requests} aceitos (escala log no eixo Y), com a linha vermelha representando a mediana de PRs por decil de idade. Estatísticas do teste anotadas no canto superior esquerdo.}
+    \label{fig:spearman_scatter}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\linewidth]{images/correlation_heatmap.png}
+    \caption{Matriz de correlações de Spearman entre as métricas dos repositórios analisados.}
+    \label{fig:heatmap}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{images/mann_whitney_comparison.png}
+    \caption{Comparação da razão de \textit{issues} fechadas entre repositórios Maduros e Jovens. (a) Boxplot pareado com anotação de medianas. (b) ECDFs sobrepostas evidenciando a dominância estocástica.}
+    \label{fig:mann_whitney}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{images/ridge_prs_by_language.png}
+    \caption{Distribuição de \textit{pull requests} aceitos pelas cinco linguagens mais frequentes (\textit{ridge plot} em escala logarítmica). A linha tracejada vermelha marca a mediana de cada linguagem.}
+    \label{fig:ridge}
+\end{figure}
 
 
 % --- SEÇÃO V: CONFIGURAÇÃO DO PROCESSO ---
@@ -299,6 +401,8 @@ Para gerenciar o fluxo de trabalho durante as \textit{sprints}, a equipe utilizo
 O quadro foi estruturado com as colunas \texttt{Backlog}, \texttt{To Do}, \texttt{Doing}, \texttt{Review} e \texttt{Done}. Para garantir o foco e mitigar o acúmulo de tarefas, implementamos uma política de \textit{Work in Progress} (WIP) restrita à coluna \texttt{Doing}, permitindo um limite máximo de \textbf{3 \textit{cards}} simultâneos (correspondente a uma tarefa por membro da equipe em andamento por vez).
 
 Para centralizar os trabalhos da disciplina, nossa equipe criou uma organização no GitHub, na qual pretende manter um repositório para cada laboratório. Essa estrutura concentra o código, as \textit{Issues}, os quadros e as permissões dos integrantes em um espaço compartilhado, em vez de vinculá-los à conta pessoal de apenas um membro.
+
+Para reduzir o risco de que alterações inconsistentes ou incorretas fossem integradas ao código de produção, a equipe adotou uma estratégia coordenada de prevenção composta por dois pilares complementares: (i) uma \textit{pipeline} de testes automatizados executada em cada \textit{pull request} via GitHub Actions e (ii) regras de proteção sobre a \textit{branch} \texttt{main} configuradas nas definições do repositório. Essas medidas atuam em conjunto, de modo que nenhuma alteração possa ser incorporada à linha principal sem passar por revisão humana e pela verificação automática dos testes. As duas frentes são detalhadas nas subseções a seguir.
 
 \subsection{Revisão de código e proteção da branch principal}
 
