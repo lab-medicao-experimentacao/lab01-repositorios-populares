@@ -47,6 +47,8 @@
 \usepackage{lipsum}				% para geração de dummy text
 \usepackage[brazilian,hyperpageref]{backref}	 % Paginas com as citações na bibl
 \usepackage[alf]{abntex2cite}	% Citações padrão ABNT
+% Compatibilidade do modelo abnTeX2 com versões recentes do memoir/TeX Live.
+\providecommand{\theforeigntitle}{}
 \renewcommand{\backrefpagesname}{Citado na(s) página(s):~}
 \renewcommand{\backref}{}
 \renewcommand*{\backrefalt}[4]{
