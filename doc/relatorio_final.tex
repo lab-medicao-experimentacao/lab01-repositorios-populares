@@ -47,6 +47,8 @@
 \usepackage{lipsum}				% para geração de dummy text
 \usepackage[brazilian,hyperpageref]{backref}	 % Paginas com as citações na bibl
 \usepackage[alf]{abntex2cite}	% Citações padrão ABNT
+% Compatibilidade do modelo abnTeX2 com versões recentes do memoir/TeX Live.
+\providecommand{\theforeigntitle}{}
 \renewcommand{\backrefpagesname}{Citado na(s) página(s):~}
 \renewcommand{\backref}{}
 \renewcommand*{\backrefalt}[4]{
@@ -413,6 +415,15 @@ A \textit{branch} \texttt{main} foi protegida contra integração direta de alte
 O repositório utiliza GitHub Actions para executar automaticamente a suíte de testes. O \textit{workflow} é acionado tanto em \textit{pull requests} destinadas à \texttt{main} quanto em atualizações dessa \textit{branch}; nele, um ambiente Ubuntu configura o Python 3.12, instala as dependências de desenvolvimento e executa o comando \texttt{pytest}. O resultado dessa execução é uma verificação obrigatória da \textit{pull request}: caso algum teste falhe, o \textit{merge} permanece bloqueado. A automação caracteriza uma prática de integração contínua (CI), pois valida cada alteração candidata antes que ela seja incorporada à linha principal do projeto.
 
 A rastreabilidade foi mantida exigindo que todos os \textit{commits} do repositório mencionassem a respectiva \textit{Issue} de origem. Além disso, ao término de cada ciclo (S01, S02 e S03), o estado do quadro foi exportado para \textit{snapshots} em formato \texttt{.csv}, refletindo o fluxo real da equipe.
+
+A Figura~\ref{fig:board-final} registra o estado final do quadro ao término do Lab01, evidenciando as colunas adotadas e a movimentação das \textit{Issues} ao longo do fluxo de trabalho.
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{print_final_board.jpeg}
+    \caption{Quadro Kanban do GitHub Projects ao final do Lab01.}
+    \label{fig:board-final}
+\end{figure}
 
 \vspace{0.5cm}
 \noindent \textbf{Link do Repositório (Grupo):} \url{https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares}
