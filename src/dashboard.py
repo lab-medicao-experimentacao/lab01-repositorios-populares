@@ -255,10 +255,45 @@ with st.container(border=True):
 
 st.markdown('<div class="eyebrow">Métricas descritivas</div>', unsafe_allow_html=True)
 
-show_metric_section("rq01", "RQ01 — Idade do repositório (dias)", "ageInDays")
-show_metric_section("rq02", "RQ02 — Pull requests aceitas", "mergedPullRequests")
-show_metric_section("rq03", "RQ03 — Total de releases", "totalReleases")
-show_metric_section("rq04", "RQ04 — Dias desde a última atualização", "timeSinceLastUpdate")
+show_metric_section(
+    "rq01",
+    "RQ01 — Idade do repositório (dias)",
+    "ageInDays",
+    hypothesis=(
+        "projetos populares tendem a ser antigos — a construção de uma comunidade "
+        "engajada e a consolidação de uma base de código estável exigem anos de "
+        "desenvolvimento contínuo."
+    ),
+)
+show_metric_section(
+    "rq02",
+    "RQ02 — Pull requests aceitas",
+    "mergedPullRequests",
+    hypothesis=(
+        "sistemas populares recebem um alto volume de pull requests — a alta "
+        "visibilidade atrai um ecossistema global de desenvolvedores dispostos a "
+        "corrigir bugs e propor features."
+    ),
+)
+show_metric_section(
+    "rq03",
+    "RQ03 — Total de releases",
+    "totalReleases",
+    hypothesis=(
+        "repositórios populares lançam releases com alta frequência, refletindo a "
+        "adoção de práticas modernas de integração e entrega contínuas (CI/CD) e a "
+        "necessidade de entregar valor constante aos usuários."
+    ),
+)
+show_metric_section(
+    "rq04",
+    "RQ04 — Dias desde a última atualização",
+    "timeSinceLastUpdate",
+    hypothesis=(
+        "projetos populares são atualizados constantemente — um baixo tempo desde "
+        "a última atualização é indicativo de um projeto vivo e com manutenção ativa."
+    ),
+)
 
 # ---------------------------------------------------------------------------
 # Linguagens
