@@ -1,0 +1,36 @@
+sprint,capturedAt,issueNumber,issueUrl,issueTitle,status,assignees
+Lab01S03,2026-08-28,49,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/49,Adicionar print do estado final do board ao relatorio,Doing,JoaquimGCVS
+Lab01S03,2026-08-28,55,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/55,Adicionar gráficos ao relatório final,Done,gnvr29
+Lab01S03,2026-08-28,26,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/26,Revisar análise e visualização RQ05/RQ06/RQ07,Done,VitorCostaVianna
+Lab01S03,2026-08-28,51,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/51,"Adicionar ao relatório final menção e explicação para nossas atividades extras (suite de testes, dashboard e ci/cd)",Done,JoaquimGCVS
+Lab01S03,2026-08-28,19,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/19,Revisar validação de dados RQ01/RQ02 nos 1.000 repositórios,Done,JoaquimGCVS
+Lab01S03,2026-08-28,25,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/25,Revisar análise e visualização RQ03/RQ04,Done,VitorCostaVianna
+Lab01S03,2026-08-28,24,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/24,Revisar análise e visualização RQ01/RQ02,Done,VitorCostaVianna
+Lab01S03,2026-08-28,21,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/21,Revisar validação de dados RQ05/RQ06/RQ07 nos 1.000 repositórios,Done,VitorCostaVianna
+Lab01S03,2026-08-28,20,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/20,Revisar validação de dados RQ03/RQ04 nos 1.000 repositórios,Done,VitorCostaVianna
+Lab01S03,2026-08-28,22,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/22,Atualizar board e exportar snapshot da S02,Done,JoaquimGCVS
+Lab01S03,2026-08-28,23,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/23,Primeira versão do relatório com hipóteses informais,Done,gnvr29
+Lab01S03,2026-08-28,31,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/31,Implementar inteface simples com Streamlit,Done,VitorCostaVianna
+Lab01S03,2026-08-28,43,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/43,[Lab01S02] Validação de Dados e Hipóteses: RQ05 a RQ07,Done,gnvr29
+Lab01S03,2026-08-28,42,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/42,[Lab01S02] Validação de Dados e Hipóteses: RQ03 e RQ04,Done,gnvr29
+Lab01S03,2026-08-28,41,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/41,[Lab01S02] Validação de Dados e Hipóteses: RQ01 e RQ02,Done,gnvr29
+Lab01S03,2026-08-28,39,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/39,[Análise Inferencial] Teste de Kruskal-Wallis H: Isolar o top 3 linguagens e testar a significância estatística do engajamento (PRs).,Done,gnvr29
+Lab01S03,2026-08-28,38,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/38,[Análise Inferencial] Teste Mann-Whitney: Taxa de issues fechadas em repositórios Maduros vs. Jovens,Done,
+Lab01S03,2026-08-28,37,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/37,[Análise Inferencial] Teste de Spearman: Implementar e rodar a correlação entre Idade e PRs aceitos.,Done,gnvr29
+Lab01S03,2026-08-28,18,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/18,Exportar dados coletados dos 1.000 repositórios para CSV,Done,gnvr29
+Lab01S03,2026-08-28,17,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/17,Estender paginação para consultar 1.000 repositórios,Done,gnvr29
+Lab01S03,2026-08-28,29,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/29,Configurar CI (GitHub Actions) para rodar testes automaticamente,Done,VitorCostaVianna
+Lab01S03,2026-08-28,34,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/34,Implementar branch protection rules na main no Repo,Done,gnvr29
+Lab01S03,2026-08-28,30,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/30,Implementar suite de testes para todos os 7 REQ + paginação + script do snapshot com pytest,Done,JoaquimGCVS
+Lab01S03,2026-08-28,15,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/15,Implementar script GraphQL que exporte os itens do Project e seu status atual para um arquivo CSV.,Done,JoaquimGCVS
+Lab01S03,2026-08-28,5,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/5,Implementar consulta de métricas RQ03 e RQ04 em GraphQL,Done,gnvr29
+Lab01S03,2026-08-28,8,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/8,Validar dados dos RQ03 e RQ04,Done,gnvr29
+Lab01S03,2026-08-28,7,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/7,RQ 07 - Agrupar métricas por linguagem de programação,Done,VitorCostaVianna
+Lab01S03,2026-08-28,11,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/11,Vallidar dados da RQ07,Done,VitorCostaVianna
+Lab01S03,2026-08-28,4,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/4,Validar dados das RQ01 e RQ02,Done,JoaquimGCVS
+Lab01S03,2026-08-28,6,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/6,"Implementar coleta de métricas RQ05, RQ06",Done,VitorCostaVianna
+Lab01S03,2026-08-28,13,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/13,Otimizar consulta GraphQL para suportar 100 repositórios (erro 502/504 do GitHub),Done,VitorCostaVianna
+Lab01S03,2026-08-28,9,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/9,"Validar dados das RQ05, RQ06",Done,VitorCostaVianna
+Lab01S03,2026-08-28,3,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/3,Implementar coleta das métricas RQ01 e RQ02,Done,JoaquimGCVS
+Lab01S03,2026-08-28,2,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/2,Configurar estrutura inicial do projeto,Done,JoaquimGCVS
+Lab01S03,2026-08-28,1,https://github.com/lab-medicao-experimentacao/lab01-repositorios-populares/issues/1,Criar repositório e configurar Kanban,Done,JoaquimGCVS
